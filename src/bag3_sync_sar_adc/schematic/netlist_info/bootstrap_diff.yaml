@@ -1,0 +1,1556 @@
+lib_name: bag3_sync_sar_adc
+cell_name: bootstrap_diff
+view_name: schematic
+bbox:
+  - -482
+  - -514
+  - 720
+  - 244
+terminals:
+  VDD:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -320
+            - -140
+            - R0
+          bbox:
+            - -381
+            - -166
+            - -310
+            - -130
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -345
+            - -140
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 1
+    ttype: 2
+  VSS:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -320
+            - -110
+            - R0
+          bbox:
+            - -381
+            - -136
+            - -310
+            - -100
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -345
+            - -110
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 2
+    ttype: 2
+  cap_bot_n:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -320
+            - -200
+            - R0
+          bbox:
+            - -381
+            - -226
+            - -310
+            - -190
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -345
+            - -200
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  cap_bot_p:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -320
+            - -170
+            - R0
+          bbox:
+            - -381
+            - -196
+            - -310
+            - -160
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -345
+            - -170
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  cap_top_n:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -320
+            - -260
+            - R0
+          bbox:
+            - -381
+            - -286
+            - -310
+            - -250
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -345
+            - -260
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  cap_top_p:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -320
+            - -230
+            - R0
+          bbox:
+            - -381
+            - -256
+            - -310
+            - -220
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -345
+            - -230
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  out_n:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -290
+            - 30
+            - R0
+          bbox:
+            - -351
+            - 4
+            - -280
+            - 40
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -315
+            - 30
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  out_p:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -290
+            - 60
+            - R0
+          bbox:
+            - -351
+            - 34
+            - -280
+            - 70
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -315
+            - 60
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  sample:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: ipin
+          view_name: symbol
+          xform:
+            - -380
+            - 60
+            - R0
+          bbox:
+            - -437
+            - 34
+            - -380
+            - 70
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -410
+            - 60
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 0
+  sample_b:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: ipin
+          view_name: symbol
+          xform:
+            - -380
+            - 30
+            - R0
+          bbox:
+            - -437
+            - 4
+            - -380
+            - 40
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -410
+            - 30
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 0
+  sig_n:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -380
+            - 0
+            - R0
+          bbox:
+            - -441
+            - -26
+            - -370
+            - 10
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -405
+            - 0
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  sig_p:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -380
+            - -30
+            - R0
+          bbox:
+            - -441
+            - -56
+            - -370
+            - -20
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -405
+            - -30
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  vg_n:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: opin
+          view_name: symbol
+          xform:
+            - -350
+            - 0
+            - R0
+          bbox:
+            - -350
+            - -26
+            - -293
+            - 10
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -325
+            - 0
+          alignment: 1
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 1
+  vg_p:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: opin
+          view_name: symbol
+          xform:
+            - -350
+            - -30
+            - R0
+          bbox:
+            - -350
+            - -56
+            - -293
+            - -20
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -325
+            - -30
+          alignment: 1
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 1
+shapes:
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VDD
+      points:
+        -
+          - 60
+          - -430
+        -
+          - 60
+          - -470
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VDD
+      origin:
+        - 53
+        - -434
+      alignment: 2
+      orient: MYR90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VDD
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 40
+          - -430
+        -
+          - 40
+          - -470
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 33
+        - -434
+      alignment: 2
+      orient: MYR90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: cap_bot_n
+      points:
+        -
+          - 20
+          - -430
+        -
+          - 20
+          - -470
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: cap_bot_n
+      origin:
+        - 13
+        - -434
+      alignment: 2
+      orient: MYR90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cap_bot_n
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: cap_top_n
+      points:
+        -
+          - 0
+          - -430
+        -
+          - 0
+          - -470
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: cap_top_n
+      origin:
+        - -7
+        - -434
+      alignment: 2
+      orient: MYR90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cap_top_n
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sample
+      points:
+        -
+          - -150
+          - -310
+        -
+          - -110
+          - -310
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sample
+      origin:
+        - -114
+        - -317
+      alignment: 8
+      orient: MX
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sample
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sample_b
+      points:
+        -
+          - -150
+          - -290
+        -
+          - -110
+          - -290
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sample_b
+      origin:
+        - -114
+        - -297
+      alignment: 8
+      orient: MX
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sample_b
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sig_n
+      points:
+        -
+          - 70
+          - -150
+        -
+          - 70
+          - -190
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sig_n
+      origin:
+        - 63
+        - -186
+      alignment: 8
+      orient: MYR90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sig_n
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: vg_n
+      points:
+        -
+          - 260
+          - -340
+        -
+          - 300
+          - -340
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: vg_n
+      origin:
+        - 264
+        - -347
+      alignment: 2
+      orient: MX
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: vg_n
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out_n
+      points:
+        -
+          - 260
+          - -260
+        -
+          - 300
+          - -260
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out_n
+      origin:
+        - 264
+        - -267
+      alignment: 2
+      orient: MX
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out_n
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sig_n
+      points:
+        -
+          - 20
+          - -80
+        -
+          - 20
+          - -120
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sig_n
+      origin:
+        - 13
+        - -126
+      alignment: 8
+      orient: MYR90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sig_n
+  -
+    - 7
+    - layer: 230
+      purpose: 4294967295
+      net: ""
+      origin:
+        - 200
+        - 130
+      alignment: 5
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cross-couple dummy inside
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sample_b
+      points:
+        -
+          - -150
+          - 20
+        -
+          - -110
+          - 20
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sample_b
+      origin:
+        - -114
+        - 27
+      alignment: 8
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sample_b
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sample
+      points:
+        -
+          - -150
+          - 40
+        -
+          - -110
+          - 40
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sample
+      origin:
+        - -114
+        - 47
+      alignment: 8
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sample
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: cap_top_p
+      points:
+        -
+          - 0
+          - 160
+        -
+          - 0
+          - 200
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: cap_top_p
+      origin:
+        - -7
+        - 164
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cap_top_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: cap_bot_p
+      points:
+        -
+          - 20
+          - 160
+        -
+          - 20
+          - 200
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: cap_bot_p
+      origin:
+        - 13
+        - 164
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cap_bot_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 40
+          - 160
+        -
+          - 40
+          - 200
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 33
+        - 164
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VDD
+      points:
+        -
+          - 60
+          - 160
+        -
+          - 60
+          - 200
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VDD
+      origin:
+        - 53
+        - 164
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VDD
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sig_p
+      points:
+        -
+          - 70
+          - -120
+        -
+          - 70
+          - -80
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sig_p
+      origin:
+        - 63
+        - -84
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sig_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out_p
+      points:
+        -
+          - 260
+          - -10
+        -
+          - 300
+          - -10
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out_p
+      origin:
+        - 264
+        - -3
+      alignment: 2
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: vg_p
+      points:
+        -
+          - 260
+          - 70
+        -
+          - 300
+          - 70
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: vg_p
+      origin:
+        - 264
+        - 77
+      alignment: 2
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: vg_p
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out_n
+      origin:
+        - 403
+        - -156
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out_n
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out_n
+      origin:
+        - 403
+        - -224
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out_n
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out_n
+      points:
+        -
+          - 410
+          - -160
+        -
+          - 410
+          - -120
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out_n
+      points:
+        -
+          - 410
+          - -260
+        -
+          - 410
+          - -220
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: sig_p
+      points:
+        -
+          - 20
+          - -190
+        -
+          - 20
+          - -150
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: sig_p
+      origin:
+        - 13
+        - -144
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sig_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 410
+          - -190
+        -
+          - 450
+          - -190
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 414
+        - -183
+      alignment: 2
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: vg_p
+      points:
+        -
+          - 330
+          - -190
+        -
+          - 370
+          - -190
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: vg_p
+      origin:
+        - 366
+        - -183
+      alignment: 8
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: vg_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out_p
+      points:
+        -
+          - 520
+          - -140
+        -
+          - 520
+          - -100
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out_p
+      origin:
+        - 513
+        - -104
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: out_p
+      points:
+        -
+          - 520
+          - -40
+        -
+          - 520
+          - 0
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: out_p
+      origin:
+        - 513
+        - -36
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out_p
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: VSS
+      points:
+        -
+          - 520
+          - -70
+        -
+          - 560
+          - -70
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: VSS
+      origin:
+        - 524
+        - -63
+      alignment: 2
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: vg_n
+      points:
+        -
+          - 440
+          - -70
+        -
+          - 480
+          - -70
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: vg_n
+      origin:
+        - 476
+        - -63
+      alignment: 8
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: vg_n
+  -
+    - 7
+    - layer: 230
+      purpose: 4294967295
+      net: ""
+      origin:
+        - 600
+        - -180
+      alignment: 5
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cross-couple capacitor dummy
+instances:
+  X2:
+    lib_name: basic
+    cell_name: noConn
+    view_name: symbol
+    xform:
+      - 300
+      - 70
+      - MYR90
+    bbox:
+      - 296
+      - 60
+      - 350
+      - 80
+    connections:
+      noConn: vg_p
+    params:
+      {}
+    is_primitive: true
+  X9:
+    lib_name: basic
+    cell_name: noConn
+    view_name: symbol
+    xform:
+      - 300
+      - -340
+      - R90
+    bbox:
+      - 296
+      - -350
+      - 350
+      - -330
+    connections:
+      noConn: vg_n
+    params:
+      {}
+    is_primitive: true
+  XCDUM_N:
+    lib_name: BAG_prim
+    cell_name: nmos4_standard
+    view_name: symbol
+    xform:
+      - 370
+      - -190
+      - R0
+    bbox:
+      - 302
+      - -224
+      - 502
+      - -145
+    connections:
+      B: VSS
+      D: out_n
+      G: vg_p
+      S: out_n
+    params:
+      l:
+        - 3
+        - 40n
+      nf:
+        - 3
+        - 1
+      w:
+        - 3
+        - 4
+    is_primitive: true
+  XCDUM_P:
+    lib_name: BAG_prim
+    cell_name: nmos4_standard
+    view_name: symbol
+    xform:
+      - 480
+      - -70
+      - R0
+    bbox:
+      - 412
+      - -104
+      - 612
+      - -25
+    connections:
+      B: VSS
+      D: out_p
+      G: vg_n
+      S: out_p
+    params:
+      l:
+        - 3
+        - 40n
+      nf:
+        - 3
+        - 1
+      w:
+        - 3
+        - 4
+    is_primitive: true
+  XN:
+    lib_name: bag3_sync_sar_adc
+    cell_name: bootstrap
+    view_name: symbol
+    xform:
+      - -360
+      - -420
+      - MX
+    bbox:
+      - -114
+      - -434
+      - 264
+      - -186
+    connections:
+      VDD: VDD
+      VSS: VSS
+      cap_bot: cap_bot_n
+      cap_top: cap_top_n
+      in: sig_n
+      in_c: sig_p
+      out: out_n
+      sample: sample
+      sample_b: sample_b
+      vg: vg_n
+    params:
+      {}
+    is_primitive: false
+  XP:
+    lib_name: bag3_sync_sar_adc
+    cell_name: bootstrap
+    view_name: symbol
+    xform:
+      - -360
+      - 150
+      - R0
+    bbox:
+      - -114
+      - -84
+      - 264
+      - 164
+    connections:
+      VDD: VDD
+      VSS: VSS
+      cap_bot: cap_bot_p
+      cap_top: cap_top_p
+      in: sig_p
+      in_c: sig_n
+      out: out_p
+      sample: sample
+      sample_b: sample_b
+      vg: vg_p
+    params:
+      {}
+    is_primitive: false
+props:
+  connectivityLastUpdated:
+    - 0
+    - 38964
+  instance#:
+    - 0
+    - 7
+  lastSchematicExtraction:
+    - 4
+    - time_val: 1654471078
+  net#:
+    - 0
+    - 0
+  pin#:
+    - 0
+    - 21
+  schGeometryLastUpdated:
+    - 0
+    - 38964
+  schGeometryVersion:
+    - 3
+    - sch.ds.gm.1.4
+  schXtrVersion:
+    - 3
+    - sch.10.0
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 38964
+  _dbvCvTimeStamp:
+    - 0
+    - 38964
+  cdbRevision:
+    - 0
+    - 227612

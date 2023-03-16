@@ -1,0 +1,839 @@
+lib_name: bag3_sync_sar_adc
+cell_name: bootstrap
+view_name: symbol
+bbox:
+  - 246
+  - -234
+  - 624
+  - 14
+terminals:
+  VDD:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 416
+          - 6
+          - 424
+          - 14
+    stype: 1
+    ttype: 2
+  VSS:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 396
+          - 6
+          - 404
+          - 14
+    stype: 2
+    ttype: 2
+  cap_bot:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 376
+          - 6
+          - 384
+          - 14
+    stype: 0
+    ttype: 2
+  cap_top:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 356
+          - 6
+          - 364
+          - 14
+    stype: 0
+    ttype: 2
+  in:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 426
+          - -234
+          - 434
+          - -226
+    stype: 0
+    ttype: 0
+  in_c:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 376
+          - -234
+          - 384
+          - -226
+    stype: 0
+    ttype: 0
+  out:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 616
+          - -164
+          - 624
+          - -156
+    stype: 0
+    ttype: 1
+  sample:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 246
+          - -114
+          - 254
+          - -106
+    stype: 0
+    ttype: 0
+  sample_b:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 246
+          - -134
+          - 254
+          - -126
+    stype: 0
+    ttype: 0
+  vg:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 616
+          - -84
+          - 624
+          - -76
+    stype: 0
+    ttype: 1
+shapes:
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 430
+          - -230
+        -
+          - 430
+          - -190
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 416
+        - -220
+      alignment: 1
+      orient: MX
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: in
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 620
+          - -160
+        -
+          - 580
+          - -160
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 614
+        - -150
+      alignment: 7
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: out
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 360
+          - 10
+        -
+          - 360
+          - -30
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 350
+        - 4
+      alignment: 1
+      orient: R270
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cap_top
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 380
+          - 10
+        -
+          - 380
+          - -30
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 370
+        - 4
+      alignment: 1
+      orient: R270
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: cap_bot
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 400
+          - 10
+        -
+          - 400
+          - -30
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 390
+        - 4
+      alignment: 1
+      orient: R270
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VSS
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 420
+          - 10
+        -
+          - 420
+          - -30
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 410
+        - 4
+      alignment: 1
+      orient: R270
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: VDD
+  -
+    - 0
+    - layer: 236
+      purpose: 4294967295
+      net: ""
+      bbox:
+        - 250
+        - -230
+        - 620
+        - 10
+  -
+    - 8
+    - layer: 236
+      purpose: 237
+      net: ""
+      origin:
+        - 440
+        - -220
+      alignment: 1
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: "[@instanceName]"
+      evaluator: cdsNLPEvalText
+  -
+    - 8
+    - layer: 231
+      purpose: 237
+      net: ""
+      origin:
+        - 490
+        - -180
+      alignment: 4
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: "[@partName]"
+      evaluator: cdsNLPEvalText
+  -
+    - 0
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      bbox:
+        - 290
+        - -210
+        - 600
+        - -30
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 440
+          - -160
+        -
+          - 460
+          - -160
+        -
+          - 460
+          - -140
+        -
+          - 500
+          - -140
+        -
+          - 500
+          - -160
+        -
+          - 600
+          - -160
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 460
+          - -130
+        -
+          - 500
+          - -130
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 300
+          - -40
+        -
+          - 340
+          - -40
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 320
+          - -50
+        -
+          - 320
+          - -40
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 340
+          - -80
+        -
+          - 350
+          - -80
+        -
+          - 370
+          - -70
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 370
+          - -80
+        -
+          - 400
+          - -80
+        -
+          - 420
+          - -70
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 420
+          - -80
+        -
+          - 430
+          - -80
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 380
+          - -80
+        -
+          - 380
+          - -100
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 340
+          - -160
+        -
+          - 350
+          - -160
+        -
+          - 370
+          - -150
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 370
+          - -160
+        -
+          - 400
+          - -160
+        -
+          - 420
+          - -150
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 420
+          - -160
+        -
+          - 430
+          - -160
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 360
+          - -110
+        -
+          - 400
+          - -110
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 360
+          - -130
+        -
+          - 400
+          - -130
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 380
+          - -130
+        -
+          - 380
+          - -160
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 380
+          - -110
+        -
+          - 380
+          - -100
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 320
+          - -160
+        -
+          - 320
+          - -180
+        -
+          - 310
+          - -180
+        -
+          - 320
+          - -190
+        -
+          - 330
+          - -180
+        -
+          - 320
+          - -180
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 320
+          - -50
+        -
+          - 320
+          - -80
+        -
+          - 350
+          - -80
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 340
+          - -160
+        -
+          - 320
+          - -160
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 430
+          - -160
+        -
+          - 430
+          - -200
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 420
+          - -160
+        -
+          - 450
+          - -160
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 420
+          - -80
+        -
+          - 480
+          - -80
+        -
+          - 480
+          - -130
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 480
+          - -80
+        -
+          - 520
+          - -80
+        -
+          - 540
+          - -70
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 540
+          - -80
+        -
+          - 570
+          - -80
+        -
+          - 570
+          - -100
+        -
+          - 560
+          - -100
+        -
+          - 570
+          - -110
+        -
+          - 580
+          - -100
+        -
+          - 570
+          - -100
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 250
+          - -130
+        -
+          - 290
+          - -130
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 296
+        - -130
+      alignment: 1
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sample_b
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 250
+          - -110
+        -
+          - 290
+          - -110
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 296
+        - -110
+      alignment: 1
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: sample
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 620
+          - -80
+        -
+          - 580
+          - -80
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 614
+        - -70
+      alignment: 7
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: vg
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 380
+          - -230
+        -
+          - 380
+          - -180
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 346
+        - -220
+      alignment: 1
+      orient: MX
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: in_c
+instances:
+  {}
+props:
+  interfaceLastChanged:
+    - 4
+    - time_val: 1654470971
+  partName:
+    - 3
+    - bootstrap
+  pin#:
+    - 0
+    - 13
+  portOrder:
+    - 5
+    - name: ILList
+      bin_val: ("out" "vg" "VDD" "VSS" "cap_bot" "cap_top" "in" "in_c" "sample" "sample_b")
+  vendorName:
+    - 3
+    - ""
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 524
+  _dbvCvTimeStamp:
+    - 0
+    - 524
+  cdbRevision:
+    - 0
+    - 227612

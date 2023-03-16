@@ -1,0 +1,199 @@
+lib_name: bag3_sync_sar_adc
+cell_name: cap_unit_group
+view_name: schematic
+bbox:
+  - -460
+  - -29
+  - -120
+  - 200
+terminals:
+  minus:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -390
+            - 160
+            - R0
+          bbox:
+            - -451
+            - 134
+            - -380
+            - 170
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -415
+            - 160
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  plus:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -390
+            - 190
+            - R0
+          bbox:
+            - -451
+            - 164
+            - -380
+            - 200
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -415
+            - 190
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+shapes:
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: plus
+      points:
+        -
+          - -190
+          - 160
+        -
+          - -190
+          - 200
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: plus
+      origin:
+        - -197
+        - 164
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: plus
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: minus
+      points:
+        -
+          - -190
+          - -20
+        -
+          - -190
+          - 20
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: minus
+      origin:
+        - -197
+        - 16
+      alignment: 8
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: minus
+instances:
+  XUNIT:
+    lib_name: bag3_sync_sar_adc
+    cell_name: cap_unit
+    view_name: symbol
+    xform:
+      - -260
+      - 20
+      - R0
+    bbox:
+      - -260
+      - 16
+      - -120
+      - 164
+    connections:
+      minus: minus
+      plus: plus
+    params:
+      {}
+    is_primitive: false
+props:
+  connectivityLastUpdated:
+    - 0
+    - 3120
+  instance#:
+    - 0
+    - 6
+  lastSchematicExtraction:
+    - 4
+    - time_val: 1635281029
+  net#:
+    - 0
+    - 5
+  pin#:
+    - 0
+    - 4
+  schGeometryLastUpdated:
+    - 0
+    - 3120
+  schGeometryVersion:
+    - 3
+    - sch.ds.gm.1.4
+  schXtrVersion:
+    - 3
+    - sch.10.0
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 3120
+  _dbvCvTimeStamp:
+    - 0
+    - 3120
+  cdbRevision:
+    - 0
+    - 227612

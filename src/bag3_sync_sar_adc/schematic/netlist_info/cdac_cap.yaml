@@ -1,0 +1,274 @@
+lib_name: bag3_sync_sar_adc
+cell_name: cdac_cap
+view_name: schematic
+bbox:
+  - -721
+  - 0
+  - -30
+  - 240
+terminals:
+  bot:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -660
+            - 100
+            - R0
+          bbox:
+            - -721
+            - 74
+            - -650
+            - 110
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -685
+            - 100
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  top:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -660
+            - 120
+            - R0
+          bbox:
+            - -721
+            - 94
+            - -650
+            - 130
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -685
+            - 120
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+shapes:
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: top
+      points:
+        -
+          - -390
+          - 200
+        -
+          - -390
+          - 240
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: top
+      origin:
+        - -397
+        - 204
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: top
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: bot
+      points:
+        -
+          - -390
+          - 0
+        -
+          - -390
+          - 60
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: bot
+      origin:
+        - -397
+        - 30
+      alignment: 5
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: bot
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: bot
+      points:
+        -
+          - -100
+          - 0
+        -
+          - -100
+          - 60
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: top
+      points:
+        -
+          - -100
+          - 200
+        -
+          - -100
+          - 240
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: top
+      origin:
+        - -107
+        - 204
+      alignment: 2
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: top
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: bot
+      origin:
+        - -107
+        - 30
+      alignment: 5
+      orient: R90
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: bot
+instances:
+  XCAP:
+    lib_name: bag3_sync_sar_adc
+    cell_name: cap_unit
+    view_name: symbol
+    xform:
+      - -170
+      - 60
+      - R0
+    bbox:
+      - -170
+      - 56
+      - -30
+      - 204
+    connections:
+      minus: bot
+      plus: top
+    params:
+      {}
+    is_primitive: false
+  XCAP_CM:
+    lib_name: bag3_sync_sar_adc
+    cell_name: cap_unit
+    view_name: symbol
+    xform:
+      - -460
+      - 60
+      - R0
+    bbox:
+      - -460
+      - 56
+      - -320
+      - 204
+    connections:
+      minus: bot
+      plus: top
+    params:
+      {}
+    is_primitive: false
+props:
+  connectivityLastUpdated:
+    - 0
+    - 13068
+  instance#:
+    - 0
+    - 6
+  lastSchematicExtraction:
+    - 4
+    - time_val: 1630636833
+  net#:
+    - 0
+    - 9
+  pin#:
+    - 0
+    - 14
+  schGeometryLastUpdated:
+    - 0
+    - 13068
+  schGeometryVersion:
+    - 3
+    - sch.ds.gm.1.4
+  schXtrVersion:
+    - 3
+    - sch.10.0
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 13068
+  _dbvCvTimeStamp:
+    - 0
+    - 13068
+  cdbRevision:
+    - 0
+    - 227612

@@ -1,0 +1,389 @@
+lib_name: bag3_sync_sar_adc
+cell_name: cap_unit
+view_name: schematic
+bbox:
+  - -360
+  - -70
+  - -126
+  - 130
+terminals:
+  minus:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -290
+            - 70
+            - R0
+          bbox:
+            - -351
+            - 44
+            - -280
+            - 80
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -315
+            - 70
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+  plus:
+    obj:
+      - 1
+      - inst:
+          lib_name: basic
+          cell_name: iopin
+          view_name: symbolr
+          xform:
+            - -290
+            - 90
+            - R0
+          bbox:
+            - -351
+            - 64
+            - -280
+            - 100
+          connections:
+            {}
+          params:
+            {}
+          is_primitive: true
+        attr:
+          layer: 229
+          purpose: 237
+          net: ""
+          origin:
+            - -315
+            - 90
+          alignment: 7
+          orient: R0
+          font: 5
+          height: 10
+          overbar: false
+          visible: true
+          drafting: true
+          attr_type: 0
+          format: 1
+    stype: 0
+    ttype: 2
+shapes:
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: plus
+      points:
+        -
+          - -260
+          - 100
+        -
+          - -220
+          - 100
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: plus
+      points:
+        -
+          - -140
+          - 100
+        -
+          - -140
+          - 130
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: minus
+      points:
+        -
+          - -220
+          - -40
+        -
+          - -200
+          - -40
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: plus
+      points:
+        -
+          - -220
+          - 100
+        -
+          - -200
+          - 100
+  -
+    - 4
+    - layer: 228
+      purpose: 4294967295
+      net: ""
+      bbox:
+        - -225
+        - 95
+        - -215
+        - 105
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: minus
+      points:
+        -
+          - -260
+          - -40
+        -
+          - -220
+          - -40
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: minus
+      points:
+        -
+          - -220
+          - -40
+        -
+          - -220
+          - 0
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: minus
+      points:
+        -
+          - -140
+          - -70
+        -
+          - -140
+          - -40
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: plus
+      points:
+        -
+          - -220
+          - 60
+        -
+          - -220
+          - 100
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: minus
+      points:
+        -
+          - -200
+          - -70
+        -
+          - -200
+          - -40
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: plus
+      points:
+        -
+          - -200
+          - 100
+        -
+          - -200
+          - 130
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: minus
+      points:
+        -
+          - -200
+          - -70
+        -
+          - -140
+          - -70
+  -
+    - 5
+    - layer: 228
+      purpose: 4294967295
+      net: plus
+      points:
+        -
+          - -200
+          - 130
+        -
+          - -140
+          - 130
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: plus
+      origin:
+        - -250
+        - 107
+      alignment: 5
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: plus
+  -
+    - 7
+    - layer: 228
+      purpose: 237
+      net: minus
+      origin:
+        - -250
+        - -33
+      alignment: 5
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: minus
+  -
+    - 4
+    - layer: 228
+      purpose: 4294967295
+      net: ""
+      bbox:
+        - -225
+        - -45
+        - -215
+        - -35
+instances:
+  XCAP:
+    lib_name: analogLib
+    cell_name: cap
+    view_name: symbol
+    xform:
+      - -220
+      - 60
+      - R0
+    bbox:
+      - -342
+      - -4
+      - -126
+      - 64
+    connections:
+      MINUS: minus
+      PLUS: plus
+    params:
+      lvsignore:
+        - 2
+        - true
+    is_primitive: true
+  XRES_MINUS:
+    lib_name: BAG_prim
+    cell_name: res_metal_1
+    view_name: symbol
+    xform:
+      - -50
+      - 120
+      - R0
+    bbox:
+      - -204
+      - 90
+      - -136
+      - 110
+    connections:
+      MINUS: plus
+      PLUS: plus
+    params:
+      l:
+        - 3
+        - 1u
+      w:
+        - 3
+        - 44n
+    is_primitive: true
+  XRES_PLUS:
+    lib_name: BAG_prim
+    cell_name: res_metal_1
+    view_name: symbol
+    xform:
+      - -50
+      - -20
+      - R0
+    bbox:
+      - -204
+      - -50
+      - -136
+      - -30
+    connections:
+      MINUS: minus
+      PLUS: minus
+    params:
+      l:
+        - 3
+        - 1u
+      w:
+        - 3
+        - 44n
+    is_primitive: true
+props:
+  connectivityLastUpdated:
+    - 0
+    - 3248
+  instance#:
+    - 0
+    - 5
+  lastSchematicExtraction:
+    - 4
+    - time_val: 1632022532
+  net#:
+    - 0
+    - 5
+  pin#:
+    - 0
+    - 2
+  schGeometryLastUpdated:
+    - 0
+    - 3248
+  schGeometryVersion:
+    - 3
+    - sch.ds.gm.1.4
+  schXtrVersion:
+    - 3
+    - sch.10.0
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 3248
+  _dbvCvTimeStamp:
+    - 0
+    - 3248
+  cdbRevision:
+    - 0
+    - 227612

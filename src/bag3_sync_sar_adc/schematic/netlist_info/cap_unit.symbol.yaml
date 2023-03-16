@@ -1,0 +1,239 @@
+lib_name: bag3_sync_sar_adc
+cell_name: cap_unit
+view_name: symbol
+bbox:
+  - 0
+  - -4
+  - 140
+  - 144
+terminals:
+  minus:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 66
+          - -4
+          - 74
+          - 4
+    stype: 0
+    ttype: 2
+  plus:
+    obj:
+      - 0
+      - layer: 229
+        purpose: 4294967295
+        net: ""
+        bbox:
+          - 66
+          - 136
+          - 74
+          - 144
+    stype: 0
+    ttype: 2
+shapes:
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 70
+          - 140
+        -
+          - 70
+          - 80
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 104
+        - 130
+      alignment: 1
+      orient: R180
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: plus
+  -
+    - 5
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      points:
+        -
+          - 70
+          - 0
+        -
+          - 70
+          - 60
+  -
+    - 7
+    - layer: 229
+      purpose: 237
+      net: ""
+      origin:
+        - 76
+        - 10
+      alignment: 7
+      orient: R180
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: minus
+  -
+    - 0
+    - layer: 236
+      purpose: 4294967295
+      net: ""
+      bbox:
+        - 0
+        - 0
+        - 140
+        - 140
+  -
+    - 8
+    - layer: 236
+      purpose: 237
+      net: ""
+      origin:
+        - 10
+        - 120
+      alignment: 1
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: "[@instanceName]"
+      evaluator: cdsNLPEvalText
+  -
+    - 8
+    - layer: 231
+      purpose: 237
+      net: ""
+      origin:
+        - 60
+        - 20
+      alignment: 4
+      orient: R0
+      font: 5
+      height: 10
+      overbar: false
+      visible: true
+      drafting: true
+      text: "[@partName]"
+      evaluator: cdsNLPEvalText
+  -
+    - 0
+    - layer: 231
+      purpose: 4294967295
+      net: ""
+      bbox:
+        - 0
+        - 0
+        - 140
+        - 140
+  -
+    - 6
+    - layer: 231
+      purpose: 241
+      net: ""
+      width: 10
+      points:
+        -
+          - 40
+          - 80
+        -
+          - 100
+          - 80
+      style: 2
+      begin_ext: 0
+      end_ext: 0
+  -
+    - 6
+    - layer: 231
+      purpose: 241
+      net: ""
+      width: 10
+      points:
+        -
+          - 70
+          - 100
+        -
+          - 70
+          - 80
+      style: 2
+      begin_ext: 0
+      end_ext: 0
+  -
+    - 6
+    - layer: 231
+      purpose: 241
+      net: ""
+      width: 10
+      points:
+        -
+          - 40
+          - 60
+        -
+          - 100
+          - 60
+      style: 2
+      begin_ext: 0
+      end_ext: 0
+  -
+    - 6
+    - layer: 231
+      purpose: 241
+      net: ""
+      width: 10
+      points:
+        -
+          - 70
+          - 60
+        -
+          - 70
+          - 40
+      style: 2
+      begin_ext: 0
+      end_ext: 0
+instances:
+  {}
+props:
+  interfaceLastChanged:
+    - 4
+    - time_val: 1603227094
+  partName:
+    - 3
+    - cap_unit
+  pin#:
+    - 0
+    - 2
+  portOrder:
+    - 5
+    - name: ILList
+      bin_val: ("minus" "plus")
+  vendorName:
+    - 3
+    - ""
+app_defs:
+  _dbLastSavedCounter:
+    - 0
+    - 118
+  _dbvCvTimeStamp:
+    - 0
+    - 118
+  cdbRevision:
+    - 0
+    - 227612
