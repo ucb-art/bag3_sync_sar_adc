@@ -6,15 +6,18 @@
 Welcome to BAG3 Synchronous SAR ADC's documentation!
 ====================================================
 
+We present a synchronous SAR ADC that can be generated with BAG3. 
+
+.. note::
+
+   This generator is developed at Berkeley Wireless Research Center (BWRC) and is released under the BSD-3-Clause license.
+
+.. note::
+
+   This page is still under development
+
+Contents 
+----------
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   setup
