@@ -914,7 +914,6 @@ class CapDacColCore(TemplateBase):
         
         unit_cap_height = unit_cap_master.array_box.h
         w_cap, h_cap = cap_master.bound_box.w, cap_master.bound_box.h
-
         sw_params = dict(
             cls_name=CapDrvCore.get_qualified_name(),
             params=dict(pinfo=self.params['pinfo'], seg=seg, ny=sum(ny_list), w=w_n, sp=sp,
@@ -923,7 +922,6 @@ class CapDacColCore(TemplateBase):
         sw_master = self.new_template(GenericWrapper, params=sw_params)
         top_layer = max(cap_master.top_layer, sw_master.top_layer)
         w_blk, h_blk = self.grid.get_block_size(top_layer)
-
         cm_sw_params = dict(pinfo=self.params['pinfo_cm'], seg=seg_cm, w=w_cm)
         cm_sw_dum_master = self.new_template(CMSwitch, params=cm_sw_params)
         w_master = cm_sw_dum_master.bound_box.w
@@ -959,7 +957,6 @@ class CapDacColCore(TemplateBase):
                 sw_params_list = [sw_master.sch_params for _ in range(nbits)]
                 sw_vss_bbox: List[BBox] = sw.get_all_port_pins('VSS')
             elif sw_type.count('n') == 2:
-
                 sw_n_params = dict(
                     cls_name=CapDrvCore.get_qualified_name(),
                     draw_taps=True,
@@ -1223,7 +1220,6 @@ class CapDacColCore(TemplateBase):
             else:
                 sw_n, sw_p = None, None
                 raise NotImplementedError
-
         # Place input signal
         tr_w_sig_vm = tr_manager.get_width(vm_layer, 'sig')
         tr_sp_sig_vm = tr_manager.get_sep(vm_layer, ('sig', 'sig'))

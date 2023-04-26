@@ -13,7 +13,7 @@ from bag.simulation.measure import MeasurementManager, MeasInfo
 from bag.math.interpolate import LinearInterpolator
 
 from bag.concurrent.util import GatherHelper
-import matplotlib
+import matplotlib.pyplot as plt
 
 from bag3_testbenches.measurement.data.tran import EdgeType
 from bag3_testbenches.measurement.tran.digital import DigitalTranTB
@@ -160,9 +160,10 @@ class ComparatorMM(MeasurementManager):
             delay_results = await self._run_sim(name + '_delay', sim_db, sim_dir, dut, tbm_delay)
             data = cast(SimResults, delay_results).data
             results['delay'] = self.process_output_delay(delay_results, tbm_delay).prev_results
-            #cls = ComparatorDelayMM
-            #cls.plot_vcm(data, results['delay']['td'], matplotlib.pyplot, tbm_delay)
-        #matplotlib.pyplot.show()
+            # cls = ComparatorDelayMM
+            # cls.plot_vcm(data, results['delay']['td'], matplotlib.pyplot, tbm_delay)
+        #     plt.plot([1,2,3], [1,2,3])
+        # plt.show()
         print(results)
         return results #cast(SimResults, delay_results).data
 

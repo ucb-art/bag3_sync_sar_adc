@@ -6,6 +6,7 @@ from pprint import pprint
 
 import os, sys
 from pathlib import Path
+import time
 import pickle
 # from asyncio import create_task
 import asyncio
@@ -103,10 +104,19 @@ class BootstrapDesigner(OptDesigner):
         return ['max_enob']
     
     async def async_design(self,  **kwargs: Any) -> Mapping[str, Any]:
+        char_start_time = time.perf_counter()
         await self.characterize_designs()
+        char_end_time = time.perf_counter()
+        print("Characterization Time: ", char_end_time-char_start_time)
+
         db_path = self._out_dir / 'db.hdf5'
         db_data = load_sim_file(str(db_path)) #FIXME
+
+        model_start_time = time.perf_counter()
         fn_table, swp_order = self.make_models()
+        model_end_time = time.perf_counter()
+        print("Modeling Time: ", model_end_time-model_start_time)
+
         # self.plot_specs(swp_order, db_data, fn_table)
         opt_specs = self._dsn_specs['opt_specs']
         spec_constraints = {k: tuple(v) for k, v in opt_specs['spec_constraints'].items()}
@@ -121,6 +131,7 @@ class BootstrapDesigner(OptDesigner):
     def run_opt_sweep(self, opt_var: str, opt_maximize: bool, swp_var: str, swp_vals: Union[List[float], np.ndarray],
                       fn_table: Dict[str, List[DiffFunction]], swp_order: List[str],
                       var_constraints: Dict[str, Any], spec_constraints: Dict[str, Any]):
+        opt_start_time = time.perf_counter()
         if swp_var == '':
             size = 1
             opt_x = {}
@@ -173,8 +184,10 @@ class BootstrapDesigner(OptDesigner):
         print("OPT_Y: ", opt_y)
         print("SPEC_VALS: ", spec_vals)
 
-        print(swp_order)
-        self.write_specs_to_yaml(opt_x, swp_var, swp_vals)
+        opt_end_time = time.perf_counter()
+        print("Optimization Time: ", opt_end_time-opt_start_time)
+
+        self.write_specs_to_yaml(opt_x, self.dsn_specs['dest_file'], swp_var, swp_vals)
         if not success_idx_list:
             raise OptimizationError("All optimization points failed")
 
@@ -253,12 +266,13 @@ class BootstrapDesigner(OptDesigner):
                     assert ans[k] == v
         return ans
 
-    def write_specs_to_yaml(self, opt_x: Dict[str, Any], swp_var: str, swp_vals: Union[List[float], np.ndarray]):
+    def write_specs_to_yaml(self, opt_x: Dict[str, Any], dest_file: str,
+                            swp_var: str, swp_vals: Union[List[float], np.ndarray]) -> None:
         if swp_var == '':
             opt_specs = self.get_dut_gen_specs(False, self.base_gen_specs, opt_x)
             write_params = parse_params_file(self.dsn_specs['gen_specs']).to_dict()
             write_params['params'] = opt_specs
-            write_yaml('opt_boot.yaml', write_params)
+            write_yaml(dest_file, write_params)
         else:
             for idx, val in enumerate(swp_vals):  
                 opt_dict = dict()
@@ -267,4 +281,4 @@ class BootstrapDesigner(OptDesigner):
                 opt_specs = self.get_dut_gen_specs(False, self.base_gen_specs, opt_dict)
                 write_params = parse_params_file(self.dsn_specs['gen_specs']).to_dict()
                 write_params['params'] = opt_specs
-                write_yaml('opt_boot_'+'swp_var'+'_'+str(idx)+'.yaml', write_params)
+                write_yaml(dest_file.replace('.yaml','')+'swp_var'+'_'+str(idx)+'.yaml', write_params)

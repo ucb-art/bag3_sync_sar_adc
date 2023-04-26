@@ -46,22 +46,34 @@ class SARSliceBootstrap(TemplateBase):
             shield="True if want shielding",
             tr_widths='Track width dictionary',
             tr_spaces='Track space dictionary',
+            directory='If the sub-components have separate yamls, then True'
         )
 
     @classmethod
     def get_default_param_values(cls) -> Dict[str, Any]:
         return dict(sampler_params=[],
                     shield=False,
-                    route_power=False)
+                    route_power=False,
+                    directory=False)
 
     def draw_layout(self) -> None:
         
-        comp_params: Param = self.params['comp_params']
-        logic_params: Param = self.params['logic_params']
-        cdac_params: Param = self.params['cdac_params']
-        sampler_params: Param = read_yaml(self.params['sampler_params'])['params']
-        clkgen_params: Param = self.params['clkgen_params']['params']
-        divcount: bool = self.params['clkgen_params']['divcount']
+        if self.params['directory']:
+            comp_params: Param = read_yaml(self.params['comp_params'])['params']
+            logic_params: Param = read_yaml(self.params['logic_params'])['params']
+            cdac_params: Param = read_yaml(self.params['cdac_params'])['params']
+            sampler_params: Param = read_yaml(self.params['sampler_params'])['params']
+            clkgen_params: Param = read_yaml(self.params['clkgen_params'])['params']
+            divcount: bool = read_yaml(self.params['clkgen_params'])['divcount']
+        else:
+            comp_params: Param = self.params['comp_params']
+            comp_params = copy.deepcopy(comp_params).to_dict()
+            logic_params: Param = self.params['logic_params']
+            cdac_params: Param = self.params['cdac_params']
+            sampler_params: Param = read_yaml(self.params['sampler_params'])['params']
+            clkgen_params: Param = self.params['clkgen_params']['params']
+            divcount: bool = self.params['clkgen_params']['divcount']
+
         tr_widths: Dict[str, Any] = self.params['tr_widths']
         tr_spaces: Mapping[Tuple[str, str], Mapping[int, Union[float, HalfInt]]] = self.params['tr_spaces']
         tr_manager = TrackManager(self.grid, tr_widths, tr_spaces)
@@ -99,9 +111,11 @@ class SARSliceBootstrap(TemplateBase):
         ncols_tot = 2 * (cdac_actual_width) // comp_master_dummy.sd_pitch
         ncols_tot = ncols_tot//(2*w_blk_in_sd_picth)*(2*w_blk_in_sd_picth)
 
+        
+        comp_params['ncols_tot']=ncols_tot-100
         comp_gen_params = dict(
             cls_name=SARComp.get_qualified_name(),
-            params=comp_params.copy(append=dict(ncols_tot=ncols_tot-100))
+            params=comp_params #.copy(append=dict(ncols_tot=ncols_tot-100))
         )
         comp_master: TemplateBase = self.new_template(GenericWrapper, params=comp_gen_params) 
 
