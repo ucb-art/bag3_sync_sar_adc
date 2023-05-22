@@ -16,8 +16,13 @@ We present a synchronous SAR ADC that can be generated with BAG3.
 
    This page is still under development
 
+.. note::
+   This generator has only been verified to be LVS and DRC clean on the configurations in the provided yamls. 
+   Verification was done with Calibre. For LVS, the layout must be compared with the netlist (not a Virtuoso schematic). 
+
 Contents 
 ----------
 
 .. toctree::
    setup
+   inventory
