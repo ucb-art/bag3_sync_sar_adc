@@ -1091,6 +1091,7 @@ class SARLogicArray(MOSBase):
             _tidx_stop = self.grid.coord_to_track(xm_layer, self.get_tile_info(_row_stop)[1], mode=RoundMode.LESS_EQ)
             tidx_list = self.get_available_tracks(xm_layer, _tidx_start, _tidx_stop, self.bound_box.xl,
                                                   self.bound_box.xh, width=tr_w_xm_sig, sep=tr_sp_xm_sig)
+            print("TIDX LIST: ", tidx_list)
             # inst_row = inst_row[::-1] if idx & 1 else inst_row
             if has_pmos_sw:
                 for jdx, inst in enumerate(inst_row):

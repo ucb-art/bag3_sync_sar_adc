@@ -1463,7 +1463,6 @@ class CapDacColCore(TemplateBase):
         sw_list = m_list
         m_list = [1 if d < diff_idx-1 else 2 for d in range(nbits)]
         unit_params_list = [master.sch_params for master in cap_master_list[1:]]
-
         self._actual_width = self.bound_box.w - routing_bnd
         self.sch_params = dict(
             sw_params_list=sw_params_list,
@@ -1472,7 +1471,7 @@ class CapDacColCore(TemplateBase):
             bot_probe=True,
             cap_m_list=m_list,
             sw_m_list=sw_list,
-            cm=ny_list[nbits - 1],
+            cm=min(ny_list), 
             cm_sw=cm_sw_master.sch_params, 
             has_cm_sw = has_cm_sw,
             remove_cap=self.params['remove_cap'],

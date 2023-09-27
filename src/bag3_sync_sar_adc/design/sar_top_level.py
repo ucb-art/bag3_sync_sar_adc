@@ -20,6 +20,7 @@ import math
 import asyncio
 import copy
 from copy import deepcopy
+import time
 
 from pybag.enum import LogLevel
 from bag.simulation.cache import DesignInstance, MeasureResult, SimResults
@@ -36,7 +37,6 @@ register_pdb_hook()
 
 
 def parse_options() -> argparse.Namespace:
-
     # design
     parser = argparse.ArgumentParser(description='Generate cell from spec file.')
     parser.add_argument('specs', help='Design specs file name.')
@@ -72,10 +72,10 @@ def parse_options() -> argparse.Namespace:
                         help='generate flat netlist.')
     parser.add_argument('-lef', dest='gen_lef', action='store_true', default=False,
                         help='generate LEF.')
-    parser.add_argument('-hier', '--gen-hier', dest='gen_hier', action='store_true', default=False,
-                        help='generate Hierarchy.')
-    parser.add_argument('-mod', '--gen-model', dest='gen_mod', action='store_true', default=False,
-                        help='generate behavioral model files.')
+    parser.add_argument('-hier', '--gen-hier', dest='gen_hier', action='store_true',
+                        default=False, help='generate Hierarchy.')
+    parser.add_argument('-mod', '--gen-model', dest='gen_mod', action='store_true', 
+                        default=False, help='generate behavioral model files.')
     parser.add_argument('-sim', dest='gen_sim', action='store_true', default=False,
                         help='generate simulation netlist instead.')
     parser.add_argument('-shell', dest='gen_shell', action='store_true', default=False,
@@ -92,15 +92,15 @@ def parse_options() -> argparse.Namespace:
     args = parser.parse_args()
     return args
 
-
-
 def run_dsn(prj: BagProject, spec_file: str, args: argparse.Namespace, dest_file: str) -> None:
     specs: Mapping[str, Any] = read_yaml(spec_file)
     specs['dsn_params']['dest_file'] = dest_file
+    specs['dsn_params']['result_dest_file'] = dest_file.replace('.yaml', '_result.yaml')
 
     log_level = LogLevel.WARN if args.quiet else LogLevel.INFO
     DesignerBase.design_cell(prj, specs,extract=args.extract, force_sim=args.force_sim,
-                             force_extract=args.force_extract, gen_cell=args.gen_cell, gen_cell_dut=args.gen_cell_dut,
+                             force_extract=args.force_extract, gen_cell=args.gen_cell, 
+                             gen_cell_dut=args.gen_cell_dut,
                              gen_cell_tb=args.gen_cell_tb, log_level=log_level)
 
 def run_gen_cell(prj: BagProject, spec_file: str, args: argparse.Namespace) -> None:
@@ -112,13 +112,25 @@ def run_gen_cell(prj: BagProject, spec_file: str, args: argparse.Namespace) -> N
                       gen_shell=args.gen_shell, export_lay=args.export_lay,
                       gen_netlist=args.gen_netlist)
 
-def run_meas_cell(prj: BagProject, spec_file: str, args: argparse.Namespace, gen_specs_file: str) -> None:
+def run_meas_cell(prj: BagProject, spec_file: str, args: argparse.Namespace,
+                  gen_specs_file: str, nbits: int) -> None:
     specs: Mapping[str, Any] = read_yaml(spec_file)
     specs['gen_specs_file'] = gen_specs_file
 
+    # Adjust the testbench to correspond with the number of decisions made
+    _save_list = specs['meas_params']['tbm_specs']['save_outputs']
+    _save_list = [f'data_out<{nbits}:0>' if 'data_out' in s else s for s in _save_list]
+    specs['meas_params']['tbm_specs']['save_outputs'] = _save_list
+    specs['meas_params']['tbm_specs']['sim_params']['num_channel'] = nbits
+    if nbits % 2:
+        specs['meas_params']['tbm_specs']['sim_params']['rst_cycle'] = 1
+    else:
+        specs['meas_params']['tbm_specs']['sim_params']['rst_cycle'] = 2
+
     log_level = LogLevel.WARN if args.quiet else LogLevel.INFO
-    prj.measure_cell(specs, extract=args.extract, force_sim=args.force_sim, force_extract=args.force_extract,
-                     gen_cell=args.gen_cell, gen_cell_dut=args.gen_cell_dut, gen_cell_tb=args.gen_cell_tb,
+    prj.measure_cell(specs, extract=args.extract, force_sim=args.force_sim, 
+                     force_extract=args.force_extract, gen_cell=args.gen_cell, 
+                     gen_cell_dut=args.gen_cell_dut, gen_cell_tb=args.gen_cell_tb,
                      log_level=log_level, fake=args.fake)
 
 def budget_noise(tot_noise: float, clk_jitter:float, samp_freq: Union[float, int], 
@@ -142,6 +154,140 @@ def budget_noise(tot_noise: float, clk_jitter:float, samp_freq: Union[float, int
 
     return cdac_budget, comp_budget, jitter_budget
 
+def non_binary_redundancy(resolution, R, mismatch, cap_cols: int=4, rowsplit: int = 5):
+
+    p_list = [1]
+    diff_flag = 0
+    pbyq_max = R  #0.5*math.exp(0.7*resolution/R)
+    finish_flag = 0
+    while(not finish_flag):
+        remwt = pow(2, resolution) - 1 - sum(p_list)
+        
+        p_temp = 2*p_list[-1]
+        q_temp = -p_temp + sum(p_list) + 1
+        if q_temp==0:
+            w_pq = 1 if p_temp > 4 else 0
+
+        elif (p_temp/q_temp>pbyq_max):
+            w_pq = (p_temp-pbyq_max*q_temp)/(pbyq_max+1)
+        else:
+            w_pq = 0
+        w_mismatch = 0 #1 if p_temp>2 else 0 #mismatch*0.01*p_temp/pow(2, resolution)
+        w_adj = math.ceil(max(w_pq, w_mismatch))
+        
+        valid_list = [i for i in range(1, cap_cols+1)] + [(cap_cols-1)*i for i in range(2, rowsplit+2)] \
+                         +  [cap_cols*i for i in range(2, rowsplit+1)]
+        valid_list = list(set(sorted(valid_list)))
+        p_temp = min(valid_list, key=lambda x: abs(x - (p_temp-w_adj))) \
+                    if math.ceil((p_temp-w_adj)/cap_cols) <= rowsplit else p_temp-w_adj
+        
+        # Reweight first few indices to make the weight determination in later steps easier
+        if math.ceil(p_temp/4) > rowsplit : 
+            if not diff_flag:
+                sum_lower = sum(p_list)
+                offset = (pow(2, resolution) - 1 - sum_lower)%(cap_cols*2)
+                print("OFFSET: ", offset)
+                offset = offset-(cap_cols*2) if offset>cap_cols else offset
+                print("OFFSET ADJ: ", offset)
+                remwt_short = sum_lower + offset  #_short indicates that it pertains to the list of indices that dont get split
+                if offset> 0:
+                    pbyq_max_short = R*2 #0.5*math.exp(0.7*resolution/R)
+                    print("pbyq: ", pbyq_max_short)
+                    finish_flag_short = 0
+                    ps_list=[1]
+                elif offset<0:
+                    pbyq_max_short = pbyq_max #0.5*math.exp(0.7*resolution/R)
+                    print("pbyq: ", pbyq_max_short)
+                    finish_flag_short = 0
+                    ps_list=[1]
+                else:
+                    finish_flag_short = 1
+                while(not finish_flag_short):
+                    # p is next value, q is sum of existing values (?)
+                    # want to have a p/q that hits the redundancy requirements
+                    # basically reconstruct the first few weights in list to satisfy remwt_short
+                    remwts = remwt_short - sum(ps_list)
+                    ps_temp = 2*ps_list[-1]
+                    qs_temp = -ps_temp + sum(ps_list) + 1
+                    print("qs_temp: ", qs_temp)
+                    if qs_temp==0: # in case q is 0, dont get undefined
+                        ws_pq = 1 if ps_temp > cap_cols else 0 
+
+                    elif (ps_temp/qs_temp>pbyq_max_short):
+                        # adjust p by ws_pq
+                        ws_pq = (ps_temp-pbyq_max_short*qs_temp)/(pbyq_max_short+1) if ps_temp > cap_cols else 0
+                    else:
+                        ws_pq = 0
+                    ws_mismatch = mismatch/100 if (ps_temp>cap_cols) else 0 
+                    ws_adj = math.ceil(max(ws_pq, ws_mismatch)) # final adjustment is max of ws_pq or ws_mismatch
+                    ps_temp = min(valid_list, key=lambda x: abs(x - (ps_temp-ws_adj)))
+                    
+                    # Sort out case where the remaining weight isn't a nice "valid number"
+                    if remwts<ps_temp:
+                        if remwts in valid_list:
+                            ps_list.append(remwts)
+                        else: 
+                            sorted_list = sorted(valid_list, key=lambda x: abs(x - remwts))
+                            # get closest number that is larger than remwts
+                            for s in sorted_list:
+                                if s > remwts:
+                                    closest_number = s
+                                    break
+                            # closest_number = sorted_list[0] if sorted_list[0]>remwts \
+                            #                     else sorted_list[1]
+
+                            qs_list = [0] + [-p + sum(ps_list[0:j]) + 1 for j, p in enumerate(ps_list)]
+                            sub_off = closest_number - remwts
+                            print(closest_number, sub_off)
+                            print(ps_list[::-1])
+                            for i, rev_p in enumerate(ps_list[::-1]):
+                                if sub_off > 0 and rev_p <=cap_cols:
+                                    print(ps_list[len(ps_list)-1-i])
+                                    ps_list[len(ps_list)-1-i] = ps_list[len(ps_list)-1-i]-1
+                                    sub_off = sub_off - 1
+                            ps_list.append(closest_number)
+                        finish_flag_short = 1
+                    else:
+                        ps_list.append(ps_temp)
+                        finish_flag_short = 0
+                
+                if offset != 0:
+                    p_list = sorted(ps_list) 
+                diff_flag = 1
+
+                p_temp = 2*p_list[-1]
+                q_temp = -p_temp + sum(p_list) + 1
+                if q_temp==0:
+                    p_temp = p_temp - 1
+                elif (p_temp/q_temp>pbyq_max):
+                    w_pq = (p_temp-pbyq_max*q_temp)/(pbyq_max+1)
+                else:
+                    w_pq = 0
+
+                w_mismatch = mismatch/100 if (p_temp>cap_cols and q_temp <1) else 0 #mismatch*0.01*p_temp/pow(2, resolution)
+                w_adj = math.ceil(max(w_pq, w_mismatch))
+
+                p_temp = p_temp-w_adj
+                p_temp = p_temp - p_temp%(cap_cols*2) if p_temp%(cap_cols*2) < cap_cols or \
+                         (-(p_temp + cap_cols*2 - p_temp%(cap_cols*2)) + sum(p_list) + 1) <1 \
+                        else p_temp + (cap_cols*2) - p_temp%(cap_cols*2)
+
+            else:
+                p_temp = p_temp - p_temp%(cap_cols*2) if p_temp%(cap_cols*2) < cap_cols or \
+                         (-(p_temp + cap_cols*2 - p_temp%(cap_cols*2)) + sum(p_list) + 1) <1 \
+                        else p_temp + (cap_cols*2) - p_temp%(cap_cols*2)
+            
+        if remwt<p_temp:
+            p_list.append(remwt)
+            finish_flag = 1
+        else:
+            p_list.append(p_temp)
+            finish_flag = 0
+  
+    final_plist = sorted(p_list)
+    qs_list = [0] + [-p + sum(final_plist[0:j]) + 1 for j, p in enumerate(final_plist)]
+    return sorted(p_list)
+
 def set_redundancy(resolution: int, throughput: int, mismatch: float):
     """Set the redundancy scheme
 
@@ -150,17 +296,32 @@ def set_redundancy(resolution: int, throughput: int, mismatch: float):
             throughput: number of evaluation cycles
             mismatch: capacitor mismatch, given as percentage
     """
-    num_codes = pow(2, resolution) * (1+mismatch*0.001)
-    bits_redun = num_codes - pow(2, resolution)
-    if num_codes>pow(2, throughput): 
+    # num_codes = pow(2, resolution) * (1+mismatch*0.001)
+    # bits_redun = num_codes - pow(2, resolution)
+    if pow(2, resolution)>pow(2, throughput): 
         # I think this should be an error
         print("Warning: Resolution not possible given throughput")
-    
-    return [pow(2, n) for n in range(resolution)]
-
+        return [pow(2, n) for n in range(resolution)]
+    elif resolution==throughput:
+        return [pow(2, n) for n in range(resolution)]
+    else:
+        R = 0.5*math.exp(0.7*resolution/3)
+        if R>1 and throughput>resolution:
+            max_cycles = 0
+            p_list_prev = []
+            while R>=1 and R<200 and max_cycles==0:
+                p_list = non_binary_redundancy(resolution, R, mismatch)
+                max_cycles = 1 if len(p_list)<=throughput else 0 
+                R = R*2
+        else:
+            print("Warning: no settling improvement achieved through \
+                  non-binary weighting, binary output returned")
+            p_list = [pow(2, n) for n in range(resolution)]
+        return p_list
+        
 def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config: List[int], 
-                    unit_cap: float, capparea: float=2.2e-6, cap_cols:int=4, lay_res:float=0.005, 
-                    min_cap: float=400):
+                    unit_cap: float, capparea: float=2.2e-6, cap_cols:int=4, rowsplit: int = 5, 
+                    lay_res:float=0.005, min_cap: float=400):
     """
         Calculates the capacitor rows and writes to file
         Arguments:
@@ -172,17 +333,54 @@ def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config
             cal_cols: number of intended columns for each row
             lay_res: layout resolution. Used to translate cap size to BAG usable format
     """
-    nbits = 9 #len(redun_config)
-    ny_list=   [1, 1, 1, 1, 1, 1, 2, 4, 4, 8]
-    ratio_list= [1, 1, 2, 4, 8, 8, 8, 8, 8, 8] 
-    col_list= [1, 1, 2, 3, 3, 4, 4, 3, 4, 4]
-    row_list= [1, 1, 1, 1, 2, 3, 5, 6, 8, 14]
-    # row_list = [1] + [math.ceil(b/cap_cols) for b in redun_config]
-    # col_list = [1] + [b%cap_cols if b%cap_cols else 4 for b in redun_config]
-    # ratio_list = [1] + [math.ceil(b/cap_cols) if idx>3 else 4 \
-    #                     for idx, b in enumerate(redun_config)]
-    # ny_list = [1] + [math.ceil(b/cap_cols) for b in redun_config]
+    # nbits = 9 #len(redun_config)
+    # ny_list=   [1, 1, 1, 1, 1, 1, 2, 4, 4, 8]
+    # ratio_list= [1, 1, 2, 4, 8, 8, 8, 8, 8, 8] 
+    # col_list= [1, 1, 2, 3, 3, 4, 4, 3, 4, 4]
+    # row_list= [1, 1, 1, 1, 2, 3, 5, 6, 8, 14]
 
+    nbits=len(redun_config)
+
+    row_list = [1] 
+    col_list = [1]
+    ny_list = [1]
+    ratio_list = [1]
+
+    valid_ny_sizes = [pow(2, i) for i in range(int(math.log(sum(redun_config))))] #[1,2,4] + [cap_cols*2*i for i in range(1, redun_config[-1]//(cap_cols*2))]
+    print("VALID NY SIZES: ", valid_ny_sizes)
+    diff_flag = 0
+    diff_idx = nbits+1
+    for idx, size in enumerate(redun_config):
+        if size<=cap_cols:
+            _col = size
+            _row = 1
+            _ny = 1
+            _ratio = size
+        else:
+            if not(size%cap_cols):
+                _col = cap_cols
+                _row = size//(cap_cols) 
+                # _ny
+                _ratio = cap_cols
+                if size/cap_cols > rowsplit:
+                    diff_idx = idx+1 if not(diff_flag) else diff_idx
+                    diff_flag = 1 if not(diff_flag) else 0
+                    _row = size//(2*cap_cols) 
+                    #_ny = int(round(_row/(2*cap_cols))*2*cap_cols)
+                    _ratio = cap_cols*2
+            else:
+                _col = cap_cols-1
+                _row = size//(cap_cols-1)
+                #_ny = _row if _row<=cap_cols else cap_cols
+                _ratio = cap_cols
+            sorted_list = sorted(valid_ny_sizes, key=lambda x: abs(x - _row*3//4))
+            _ny = sorted_list[0]
+
+        row_list.append(_row)
+        col_list.append(_col)
+        ny_list.append(_ny)
+        ratio_list.append(_ratio)
+    print(ny_list) 
     sq_area = unit_cap/capparea  
     wl = math.sqrt(sq_area)
     unit_width = math.ceil(wl/lay_res) if math.ceil(wl/lay_res)>min_cap else min_cap
@@ -191,6 +389,7 @@ def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config
 
     write_params = copy.deepcopy(cdac_params)
     write_params['params']['nbits'] = nbits
+    write_params['params']['diff_idx'] = diff_idx
     write_params['params']['row_list'] = row_list
     write_params['params']['col_list'] = col_list
     write_params['params']['ratio_list'] = ratio_list
@@ -209,15 +408,22 @@ def set_logic_params(logic_params: Mapping[str, Any], dest_file: str, nbits: int
             nbits: number of ADC decision steps
     """
     logic_unit_row_arr = [1, 2, 2]
+    max_idx = 2
     idx = 2
     for i in range(nbits-4):
-        logic_unit_row_arr[idx] +=1
-        if idx > 0:
-            idx = idx-1
-        else:
-            idx = 2
+        if logic_unit_row_arr[idx] >= 4:
+            logic_unit_row_arr = [3, 3, 3, 3]
+            max_idx += 1
+            idx = max_idx
+        else:   
+            logic_unit_row_arr[idx] +=1
+            if idx > 0:
+                idx = idx-1
+            else:
+                idx = max_idx
+
     flop_out_unit_row_arr = [3, 2]
-    idx = 0
+    idx = 1
     for i in range (nbits-4):
         flop_out_unit_row_arr[idx] +=1
         idx = 1 if idx==0 else 0
@@ -241,6 +447,38 @@ def set_clk_params(clk_params: Mapping[str, Any], dest_file: str, nbits: int):
     write_params = copy.deepcopy(clk_params)
     write_params['params']['total_cycles']=nbits
     write_yaml(dest_file, write_params)
+
+def set_sample_opt_params(opt_file_src: str, opt_file_dest: str, sig_sampler_wrfile: str,
+                          gen_specs_sampler: Mapping[str, Any], meas_wrfile: str, len_redun: int):
+    
+    sig_sampler_params = copy.deepcopy(read_yaml(gen_specs_sampler['params']['sig_sampler']))
+    default_list = sig_sampler_params['params']['nmos_params']['sampler_params']['m_list']
+    if len(default_list) != len_redun:
+        #breakpoint()
+        if len_redun>len(default_list):
+            new_list = default_list + [max(default_list) for i in range(len_redun-len(default_list))]
+        else:
+            new_list = default_list[0:len_redun]
+        print("NEW LIST: ", new_list, '******************************************************')
+        sig_sampler_params['params']['nmos_params']['sampler_params']['m_list'] = new_list
+        sig_sampler_params['params']['nmos_params']['seg_dict']['sampler'] = new_list
+        write_yaml(sig_sampler_wrfile, sig_sampler_params)
+
+        write_dsn_params = copy.deepcopy(read_yaml(opt_file_src))
+        meas_params = copy.deepcopy(read_yaml( write_dsn_params['dsn_params']['meas_params']))
+        meas_params['meas_params']['tbm_specs']['save_outputs']
+        _save_list = meas_params['meas_params']['tbm_specs']['save_outputs']
+        _save_list = [f'out<{len_redun-1}:0>' if 'out<' in s else s for s in _save_list]
+        meas_params['meas_params']['tbm_specs']['save_outputs'] = _save_list
+        write_yaml(meas_wrfile, meas_params)
+
+        write_dsn_params['dsn_params']['gen_specs'] = sig_sampler_wrfile
+        write_dsn_params['dsn_params']['meas_params'] = meas_wrfile
+        write_yaml(opt_file_dest, write_dsn_params)
+
+        return opt_file_dest
+    else:
+        return opt_file_src
 
 def set_sampletop_params(sampler_params: Mapping[str, Any], dest_files):
     """
@@ -282,6 +520,7 @@ if __name__ == '__main__':
         print('loading BAG project')
         _prj = local_dict['bprj']
 
+    t_start = time.time()
     specs = read_yaml(_args.specs)
 
     # read parameters
@@ -313,22 +552,37 @@ if __name__ == '__main__':
     lsb_size = input_range/pow(2, N)
     max_noise = lsb_size/2
     redun_config = set_redundancy(N, throughput, c_mismatch)
+    print(redun_config)
 
     noise_cdac, noise_comp, noise_jitter = budget_noise(max_noise, clk_jitter, 
                                                         samp_freq, input_range, unit_res)
 
     # TODO: parallelize the optimizer run
     run_dsn(_prj, specs['opt_components']['comp'], _args, dest_file_list['comp'])
-    
+    comp_opt_perf = read_yaml(dest_file_list['comp'].replace('.yaml', '_result.yaml'))
+    if comp_opt_perf['noise'][0] > noise_comp:
+        print("*****WARNING: Comparator noise budgeted unacheivable for topology and sizing range")
+    else:
+        print(f"----Comparator noise {comp_opt_perf['noise'][0]} less than budgeted {noise_comp} ----- :)")
+        
     kT = 9.83e-22
     unit_cap = (kT/noise_cdac)/sum(redun_config)
     set_cdac_params(gen_specs_cdac, dest_file_list['cdac'], redun_config, 
                     unit_cap)
-    set_logic_params(gen_specs_logic_array, dest_file_list['logic'], len(redun_config)+1)
-    set_clk_params(gen_specs_clkgen, dest_file_list['clkgen'], len(redun_config)+2)
+    set_logic_params(gen_specs_logic_array, dest_file_list['logic'], len(redun_config))
+    set_clk_params(gen_specs_clkgen, dest_file_list['clkgen'], 
+                  len(redun_config)+(1 if len(redun_config)%2 else 2))
 
     # # sampler
-    run_dsn(_prj, specs['opt_components']['bootstrap'], _args, dest_file_list['sampler']['sig_sampler'])
+    sampler_opt_file = set_sample_opt_params(specs['opt_components']['bootstrap'],
+                                dest_file_list['directory']+specs['opt_components']['bootstrap_copy'], 
+                                dest_file_list['directory']+specs['opt_components']['sig_sampler_dsn'],
+                                gen_specs_sampler,
+                                dest_file_list['directory']+specs['opt_components']['sig_sampler_meas'],
+                                len(redun_config))
+    print("SIMMING THIS: ", sampler_opt_file, '-----------------------------------------------------')
+    run_dsn(_prj, sampler_opt_file, _args, 
+            dest_file_list['sampler']['sig_sampler'])
     set_sampletop_params(gen_specs_sampler, dest_file_list['sampler'])
     # #write to the final ADC
     set_sar_top_params(gen_specs, dest_file_list)
@@ -336,9 +590,12 @@ if __name__ == '__main__':
 
     # # simulate ADC
     # run_meas_cell(_prj, specs['top_verification_tbm']['static'], _args)
-    run_meas_cell(_prj, specs['top_verification_tbm']['dynamic'], _args, dest_file_list['sar_top'])
+    run_meas_cell(_prj, specs['top_verification_tbm']['dynamic'], _args, 
+                  dest_file_list['sar_top'], len(redun_config))
 
     # read results
+    performance = read_yaml('results_dynamic.yaml')
+    print(performance)
 
     # #enumerate how the ADC failed:
     # while (pass_specs !=0 and iterations<num_iter):
@@ -346,3 +603,7 @@ if __name__ == '__main__':
     #     # simulate, check    
     # final synthesize ADC
     run_gen_cell(_prj, specs['dest_files']['sar_top'], _args)
+
+    t_end = time.time()
+
+    print(f"TOTAL TIME: {t_end-t_start}")

@@ -187,7 +187,10 @@ class BootstrapDesigner(OptDesigner):
         opt_end_time = time.perf_counter()
         print("Optimization Time: ", opt_end_time-opt_start_time)
 
+        # Write optimized circuit specs and corresponding performance to two files
         self.write_specs_to_yaml(opt_x, self.dsn_specs['dest_file'], swp_var, swp_vals)
+        write_yaml(self.dsn_specs['result_dest_file'], spec_vals)
+
         if not success_idx_list:
             raise OptimizationError("All optimization points failed")
 

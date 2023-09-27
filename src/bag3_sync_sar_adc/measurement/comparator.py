@@ -11,6 +11,7 @@ from bag.simulation.data import AnalysisType
 from bag.simulation.cache import SimulationDB, DesignInstance, SimResults, MeasureResult
 from bag.simulation.measure import MeasurementManager, MeasInfo
 from bag.math.interpolate import LinearInterpolator
+from bag.io.file import write_yaml
 
 from bag.concurrent.util import GatherHelper
 import matplotlib.pyplot as plt
@@ -135,6 +136,7 @@ class ComparatorMM(MeasurementManager):
         tbm_pac = self.setup_tbm(sim_db, dut, PACTB)
         pac_results = await self._run_sim(name + '_pac', sim_db, sim_dir, dut, tbm_pac)
         noise = self.process_output_noise(noise_results, pac_results).prev_results
+
         return noise
 
     async def async_measure_performance(self, name: str, sim_dir: Path, sim_db: SimulationDB,

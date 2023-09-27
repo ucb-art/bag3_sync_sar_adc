@@ -61,6 +61,7 @@ class CompDesigner(OptDesigner):
         self._meas_params = parse_params_file(self.dsn_specs['meas_params'])['meas_params']
         self._constraints = self.dsn_specs['opt_specs']
         
+        self.result_dest = self.dsn_specs['result_dest_file']
         opt_specs = self.dsn_specs['opt_specs']
         self._constraints = {k: (v[0] if v[0] is not None else 0, 
                                  v[1] if  v[1] is not None else math.inf) \
@@ -193,7 +194,10 @@ class CompDesigner(OptDesigner):
         opt_end_time = time.perf_counter()
         print("Optimization Time: ", opt_end_time-opt_start_time)
         
+        # Write optimized circuit specs and corresponding performance to two files
         self.write_specs_to_yaml(opt_x, self.dsn_specs['dest_file'], swp_var, swp_vals)
+        write_yaml(self.dsn_specs['result_dest_file'], spec_vals)
+
         if not success_idx_list:
             raise OptimizationError("All optimization points failed")
 
@@ -223,6 +227,8 @@ class CompDesigner(OptDesigner):
        mm_specs = deepcopy(self.get_shared_meas_specs(sim_swp_params))
        mm_specs.update({k: deepcopy(v) for k, v in self._meas_params.get(meas_name, {}).items()})
 
+       mm_specs['dest_file'] = self.result_dest
+       
        mm_specs = setup_fn(mm_specs)
 
        mm = self.make_mm(mm_cls, mm_specs)

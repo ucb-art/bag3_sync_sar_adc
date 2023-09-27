@@ -871,8 +871,8 @@ class Bootstrap_simple(TemplateBase):
                 nout += 1
 
         # Connect sample to a horizontal layer
-        samp_vm_tidx_lower = self.grid.coord_to_track(vm_layer, nwl.bound_box.xl)
-        samp_vm_tidx_upper = self.grid.coord_to_track(vm_layer, nwl.bound_box.xh)
+        samp_vm_tidx_lower = self.grid.coord_to_track(vm_layer, (nwl.bound_box.xl//h_blk)*h_blk)
+        samp_vm_tidx_upper = self.grid.coord_to_track(vm_layer, (-(-nwl.bound_box.xh//h_blk))*h_blk)
         samp_vm_avail_tracks = self.get_available_tracks(vm_layer, samp_vm_tidx_lower, samp_vm_tidx_upper, 
                                                             nmos.bound_box.yh, nwl.bound_box.yh)
         samp_vm = self.connect_to_tracks(nwl.get_pin('sample'), TrackID(vm_layer, samp_vm_avail_tracks[0], tr_w_sig_vm))

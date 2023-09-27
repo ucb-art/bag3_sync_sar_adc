@@ -82,8 +82,24 @@ class SarSliceMM(MeasurementManager):
         tbm = cast(TranTB, sim_db.make_tbm(TranTB, tbm_specs))
         self._tbm_info = tbm, {}
         self._dut = dut
+        self._dut_specs = self._dut.lay_master.params
+        self._dut_specs_cdac = read_yaml(self._dut_specs['cdac_params'])['params']  \
+                                if self._dut_specs['directory'] else self._dut_specs['cdac_params']
+        nbit = self._dut_specs_cdac['nbits']
+        row_list = self._dut_specs_cdac['row_list']
+        col_list = self._dut_specs_cdac['col_list']
+        diff_idx = self._dut_specs_cdac['diff_idx']
+        weight_list = [r*c for r,c in zip(row_list[1:diff_idx], col_list[1:diff_idx])] 
+        if diff_idx < nbit:
+            weight_list = weight_list + [2*r*c for r,c in zip(row_list[diff_idx:], col_list[diff_idx:])]
+        self.weight_list = weight_list
+
         sig_results = await self._run_sim(name, sim_db, sim_dir, dut, tbm)
-        results = self.process_output(sig_results)
+        fig_list, results = self.process_output(sig_results)
+        
+        with PdfPages(str(self.specs['results_files']+'.pdf')) as pdf:
+            for f in fig_list:
+                pdf.savefig(f)
         return results #MeasInfo('sim', {})  # ???: function of MeasInfo???
     
     def process_output(self, sim_results: Union[SimResults, MeasureResult]
@@ -123,10 +139,12 @@ class SarSliceMM(MeasurementManager):
                 vdm_list.append(res['vdm'])
                 code_list.append(res['code'])
 
-            print(vdm_list)
-            print("CODE: ", code_list)
+            results_dict = dict()
             if self.specs['make_static_code_map']:
-                ncode, sndr, enob = self.fit_code_map(vdm_list, code_list)
+                fig_trans, fig_sndr, ncode, sndr, enob = self.fit_code_map(vdm_list, code_list)
+                results_dict['static_ncode'] = ncode
+                results_dict['static_sndr'] = sndr
+                results_dict['static_enob'] = enob
                 self.log_result(dict(num_codes=ncode, sndr_low_freq=sndr, enob_low_freq=enob))
                 self.warn("This testbench implements the same simulation as old LAYGO generator static testbench. "
                           "It has calibration function when use sub-radix2."
@@ -134,23 +152,23 @@ class SarSliceMM(MeasurementManager):
                           "Due to limited number of sweep points, "
                           "the performance might be worse than dynamic testbench.")
             if self.specs['hist_analysis']:
-                result_hist = self.process_hist(code_hist_list)
+                # print("CODE HIST: ", code_hist_list)
+                fig_hist, result_hist = self.process_hist(code_hist_list)
+                results_dict.update(result_hist)
                 print(result_hist)
-
+            write_yaml(self.specs['results_files']+'.yaml', results_dict)
         else:
             result = self._process_output_helper(data, self.specs['tbm_specs']['sim_params']['vdm'], -1)
             self.log_result(result)
             self.warn("Not enough points to make static code map or complete histogram analysis for INL/DNL."
                       "You must have >2 sweep points and set make_static_code_map and hist_analysis, respectively"
                       "for these analysis")
-        plt.show()
-        return True, MeasInfo('done', {})
+        return [fig_trans, fig_sndr, fig_hist],  MeasInfo('done', {})
 
     def _process_output_helper(self, data: SimData, vdm: float, idx: int):
         # Get some simulation params
-        self._dut_specs = self._dut.lay_master.params
-        nbit = self._dut_specs['cdac_params']['nbits']
-        row_list = self._dut_specs['cdac_params']['row_list'].to_list()
+        nbit = self._dut_specs_cdac['nbits']
+        row_list = self._dut_specs_cdac['row_list']
         val_sup = self.specs['tbm_specs']['sim_params']['vdd']
         val_range = self.specs['tbm_specs']['sim_params']['vrefp'] - self.specs['tbm_specs']['sim_params']['vrefn']
         val_th = val_sup / 2
@@ -171,19 +189,22 @@ class SarSliceMM(MeasurementManager):
             for jdx in range(1, nbit+1):
                 data_out_final_value = find_last_non_nan(data[f'data_out<{jdx}>'][0])
                 bit_list.append(data_out_final_value > val_th)
-
+        #Might be something wrong here?
         
-        if len(row_list)<nbit:
-            bit_list = [str(int(not b)) for b in bit_list]
-            bit_str = '0b' + ''.join(bit_list[::-1])
-            code = int(bit_str, 2)
-            dout = code / 2 ** nbit * 2 * val_range - val_range
-        else:
-            bit_list = [int(not b) for b in bit_list]
-            col_list = self._dut_specs['cdac_params']['col_list'].to_list()
-            weight_list = [r*c for r,c in zip(row_list[1:], col_list[1:])]
-            code = sum([b*w for b,w in zip(bit_list, weight_list)])
-            dout = code/sum(weight_list) * 2*val_range - val_range
+        # if len(row_list)<nbit:
+        #     bit_list = [str(int(not b)) for b in bit_list]
+        #     bit_str = '0b' + ''.join(bit_list[::-1])
+        #     code = int(bit_str, 2)
+        #     dout = code / 2 ** nbit * 2 * val_range - val_range
+        # else:
+        bit_list = [int(not b) for b in bit_list]
+        # col_list = self._dut_specs['cdac_params']['col_list']
+        # diff_idx = self._dut_specs_cdac['diff_idx']
+        # weight_list = [r*c for r,c in zip(row_list[1:diff_idx], col_list[1:diff_idx])] 
+        # if diff_idx < nbit:
+        #     weight_list = weight_list + [2*r*c for r,c in zip(row_list[diff_idx:], col_list[diff_idx:])]
+        code = sum([b*w for b,w in zip(bit_list, self.weight_list)])
+        dout = code/sum(self.weight_list) * 2*val_range - val_range
 
         return dict(vdm=vdm, dout=dout, code=code) #all_codes=all_codes_list
 
@@ -191,12 +212,12 @@ class SarSliceMM(MeasurementManager):
         # Collect the bits for histogram test
 
         self._dut_specs = self._dut.lay_master.params
-        nbit = self._dut_specs['cdac_params']['nbits']
+        nbit = self._dut_specs_cdac['nbits']
         val_sup = self.specs['tbm_specs']['sim_params']['vdd']
         val_range = self.specs['tbm_specs']['sim_params']['vrefp'] - self.specs['tbm_specs']['sim_params']['vrefn']
         val_th = val_sup / 2
 
-        row_list = self._dut_specs['cdac_params']['row_list'].to_list()
+        row_list = self._dut_specs_cdac['row_list']
         
 
         def find_last_non_nan_idx(vec):
@@ -242,50 +263,59 @@ class SarSliceMM(MeasurementManager):
             all_codes_matrix.append(bit_sam)
         
         all_codes_matrix = np.array(all_codes_matrix)
+        # print("ALL CODES ARRAY SHAPE: ", all_codes_matrix.shape)
+        # print(all_codes_matrix)
         all_codes_list = []
         all_dout_list = []
         for ns in range(num_samples):
             a = all_codes_matrix[:,ns]
-            if len(row_list) < nbit:
-                code = int('0b'+''.join(a[::-1]),2)
-                all_codes_list.append(code)
-                dout = code / 2 ** nbit * 2 * val_range - val_range
-                all_dout_list.append(dout)
-            else:
-                col_list = self._dut_specs['cdac_params']['col_list'].to_list()
-                weight_list = [r*c for r,c, in zip(row_list[1:], col_list[1:])]
-
-                a = [int(i) for i in a]
-                code = sum([bit*w for bit, w in zip(a[::-1], weight_list)])
-                all_codes_list.append(code)
-                dout = code / sum(weight_list) * 2 * val_range - val_range
-                all_dout_list.append(dout)
+            # if len(row_list) < nbit:
+            #     code = int('0b'+''.join(a[::-1]),2)
+            #     all_codes_list.append(code)
+            #     dout = code / 2 ** nbit * 2 * val_range - val_range
+            #     all_dout_list.append(dout)
+            # else:
+            # col_list = self._dut_specs_cdac['col_list']
+            # diff_idx = self._dut_specs_cdac['diff_idx']
+            # weight_list = [r*c for r,c in zip(row_list[1:diff_idx], col_list[1:diff_idx])] 
+            # if diff_idx < nbit:
+            #     weight_list = weight_list + [2*r*c for r,c in zip(row_list[diff_idx:], col_list[diff_idx:])]
+            
+            a = [int(i) for i in a]
+            # print(a, self.weight_list)
+            code = sum([bit*w for bit, w in zip(a, self.weight_list)]) #a[::-1]
+            all_codes_list.append(code)
+            dout = code / sum(self.weight_list) * 2 * val_range - val_range
+            all_dout_list.append(dout)
 
         return all_codes_list, all_dout_list
     
     def process_hist(self, code_list: List[Union[float, int]]):
         # Given code list, produce histogram, INL and DNL
 
-        nbit = self._dut_specs['cdac_params']['nbits']
-        row_list = self._dut_specs['cdac_params']['row_list'].to_list()
-        if len(row_list) < nbit:
-            num_bins = 2**nbit
-        else:
-            col_list = self._dut_specs['cdac_params']['col_list'].to_list()
-            weight_list = [r*c for r,c, in zip(row_list, col_list)]
-            num_bins = sum(weight_list)
+        nbit = self._dut_specs_cdac['nbits']
+        row_list = self._dut_specs_cdac['row_list']
+        # if len(row_list) < nbit:
+        #     num_bins = 2**nbit
+        # else:
+        # col_list = self._dut_specs_cdac['col_list']
+        # diff_idx = self._dut_specs_cdac['diff_idx']
+        # weight_list = [r*c for r,c in zip(row_list[1:diff_idx], col_list[1:diff_idx])] 
+        # if diff_idx < nbit:
+        #     weight_list = weight_list + [2*r*c for r,c in zip(row_list[diff_idx:], col_list[diff_idx:])]
+        num_bins = sum(self.weight_list)
 
         hist, bin_edges = np.histogram(code_list, bins=num_bins)
 
         bins = hist[1:-1] # ignore first and last histogram points
         avg_bins = sum(bins)/len(bins)
         dnl_list = [(b/avg_bins)-1 for b in bins]
-
+        print("DNL_LIST: ", dnl_list)
         # dnl = [(t - avg_codew)/avg_codew for t in time_delta]
         inl_list = [sum(dnl_list[0:i]) for i, _ in enumerate(dnl_list)]
         inl_list.append(sum(dnl_list))
-
-        _, ax = plt.subplots(2, 1)
+        
+        fig, ax = plt.subplots(2, 1)
         labelsize=20
         ticksize=18
         ax[0].plot(np.arange(1, len(inl_list)+1, 1), inl_list, 'o--', label='INL', )
@@ -294,7 +324,7 @@ class SarSliceMM(MeasurementManager):
         ax[0].set_xlabel('Code', fontsize = labelsize, fontweight='bold')
         ax[0].grid()
         ax[0].set_ylabel('INL (LSB)', fontsize = labelsize, fontweight='bold')
-        ax[0].set_ylim([-0.25, 0.25])
+        ax[0].set_ylim([-(max(inl_list)+0.05), (max(inl_list)+0.05)])
         plt.setp(ax[0].get_xticklabels(), fontsize=ticksize)
         plt.setp(ax[0].get_yticklabels(), fontsize=ticksize)
         # plt.figure(2)
@@ -304,12 +334,12 @@ class SarSliceMM(MeasurementManager):
         ax[1].set_xlabel('Code', fontsize = labelsize, fontweight='bold')
         ax[1].grid()
         ax[1].set_ylabel('DNL (LSB)', fontsize = labelsize, fontweight='bold')
-        ax[1].set_ylim([-0.25, 0.25])
+        ax[1].set_ylim([-(max(dnl_list)+0.05), (max(dnl_list)+0.05)])
         plt.setp(ax[1].get_xticklabels(), fontsize=ticksize)
         plt.setp(ax[1].get_yticklabels(), fontsize=ticksize)
         plt.tight_layout()
 
-        return dict(inl=max(inl_list), dnl=max(dnl_list))
+        return fig, dict(inl=max(inl_list), dnl=max(dnl_list))
 
     
     @classmethod
@@ -323,9 +353,10 @@ class SarSliceMM(MeasurementManager):
             ax.plot([vin[idx + 1], vin[idx + 1]], [code[idx], code[idx + 1]], 'r')
 
     #need another def for figuring out weights
+    # TODO make this work for non binary weighting
     def fit_code_map(self, vin, code):
-        nbit = 4 #self._dut.sch_master.params['nbits']
-        nbit_cal = nbit
+        #nbit = self._dut_specs_cdac['nbits'] #FIXME 4 #self._dut.sch_master.params['nbits']
+        nbit_cal = int(np.floor(np.log2(sum(self.weight_list)))) #nbit
         _vcm = self.specs['tbm_specs']['sim_params']['v_vcm']
 
         code_th = 0
@@ -337,16 +368,15 @@ class SarSliceMM(MeasurementManager):
                 code_list.append(int(code_th))
                 vth_list.append(0.5 * (vin[i - 1] + vin[i]))
                 code_th = code[i]
-        print(code_list, len(code_list))
-        print("VTH LIST: ", vth_list, len(vth_list))
+        # print(code_list, len(code_list))
+        # print("VTH LIST: ", vth_list, len(vth_list))
         # estimate input range calibration due to gain error
         delta_avg = (vth_list[-1] - vth_list[0]) / (code_list[-1]-code_list[0]) #2 ** (nbit - 1)
         print("DELTA_AVG: ", delta_avg)
         v_in = 0.5 * (-vth_list[0] + vth_list[-1]) # - delta_avg
         print("your adjusted input swing is:", v_in)
         print(f"number of code{len(code_list)}")
-
-        _, ax = plt.subplots(1)
+        fig, ax = plt.subplots(1)
         self.plot_transfer_func(vth_list, code_list, ax)
 
         ax.grid()
@@ -372,7 +402,6 @@ class SarSliceMM(MeasurementManager):
             while len(calmap_in_th) - 1 < c:
                 calmap_in_th.append(len(calmap_in_th))
                 calmap_out.append(calout)
-        print("Calmap: ", calmap_out)
 
         # evaluate low freq ENOB
         # make a sine signal
@@ -441,7 +470,7 @@ class SarSliceMM(MeasurementManager):
 
         # --- Plot time-domain and freq-domain ---
         fft_n = np.size(freq_array) // 2
-        _, ax = plt.subplots(2, 1)
+        fig_sndr, ax = plt.subplots(2, 1)
         ax[0].plot(sin_time_bin, sinq_ideal, 'r', label=f'ideal {nbit_cal}-bit')
         ax[0].plot(sin_time_bin, sinq_code, 'b', label='design')
         ax[0].legend()
@@ -460,7 +489,8 @@ class SarSliceMM(MeasurementManager):
         ax[1].set_xlabel('f/fs')
         ax[1].set_ylabel('dB')
         plt.tight_layout()
-        return len(code_list), sinq_sndr, sinq_enob
+       
+        return fig, fig_sndr, len(code_list), sinq_sndr, sinq_enob
 
     def log_result(self, new_result: Mapping[str, Any]) -> None:
         fmt = '{:.5g}'
@@ -476,16 +506,17 @@ class SarSliceDynamicMM(SarSliceMM):
     The signal frequency is calculated by how many signal cycles (num_sig) in simulation period
         freq_sig = (num_sig/num_sample)*(1/t_per)
     """
+    #FIXME Need to add DR measurement and max sampling speed characterization
 
     def process_output(self, sim_results: Union[SimResults, MeasureResult]
                        ) -> Tuple[bool, MeasInfo]:
-
         data = cast(SimResults, sim_results).data
         tvec = data['time']
-        nbit = 5 #self._dut.sch_master.params['nbits']
+        nbit = self._dut_specs_cdac['nbits']
         sim_params = self.specs['tbm_specs']['sim_params']
         num_sample = sim_params['num_sample']
         t_per = sim_params['t_per']
+        row_list = self._dut_specs_cdac['row_list']
 
         calc = self._tbm_info[0].get_calculator(data)
         t_sam = calc.eval(sim_params['t_sam'])
@@ -493,14 +524,12 @@ class SarSliceDynamicMM(SarSliceMM):
         val_th = sim_params['vdd'] / 2
 
         bit_list = []
-        for idx in range(nbit):
+        for idx in range(1, nbit+1):
             yvec = data[f'data_out<{idx}>'][0]
             bit_list.append(interp1d_no_nan(tvec, yvec))
 
         dout_list = []
         tvec = []
-        #FIXME need to add non-binary cap weighting
-        # Need to add DR measurement and max sampling speed characterization
         for idx in range(4, num_sample+4):
             _t = t_per * idx + t_sam
             _binary_list = []
@@ -508,22 +537,38 @@ class SarSliceDynamicMM(SarSliceMM):
                 _bit = bit_list[jdx]
                 _binary_list.append(_bit(_t) > val_th)
 
-            _binary_list = [str(int(not b)) for b in _binary_list]
-            bit_str = '0b' + ''.join(_binary_list[::-1])
-            code = int(bit_str, 2)
-            dout = code
-            # dout = code / 2 ** nbit * 2 * val_range - val_range
+            # if len(row_list)<nbit:
+            #     _binary_list = [str(int(not b)) for b in _binary_list]
+            #     bit_str = '0b' + ''.join(_binary_list[::-1])
+            #     code = int(bit_str, 2)
+            #     # dout = code
+            #     dout = code / 2 ** nbit 
+            # else:
+            _binary_list = [int(not b) for b in _binary_list]
+            # col_list = self._dut_specs_cdac['col_list']
+            # diff_idx = self._dut_specs_cdac['diff_idx']
+            # weight_list = [r*c for r,c in zip(row_list[1:diff_idx], col_list[1:diff_idx])] 
+            # if diff_idx < nbit:
+            #     weight_list = weight_list + [2*r*c for r,c in zip(row_list[diff_idx:], col_list[diff_idx:])]
+            code = sum([b*w for b,w in zip(_binary_list, self.weight_list)])
+            dout = code/sum(self.weight_list) 
+          
             dout_list.append(dout)
             tvec.append(_t[0])
-
-        # Make time
-        sndr, sfdr = self.process_fft(np.array(tvec), np.array(dout_list), plot=True)
-        self.log_result(dict(freq=calc.eval(sim_params['freq_sig'])[0], sndr=sndr, sfdr=sfdr))
-
-        return True, MeasInfo('done', {})
+        print("WEIGHT LIST: ", self.weight_list)
+        fig_fft, sndr, sfdr, enob = self.process_fft(np.array(tvec), np.array(dout_list), 
+                                            file=self.specs['results_files'], plot=True )
+        self.log_result(dict(freq=calc.eval(sim_params['freq_sig'])[0], sndr=sndr, sfdr=sfdr, enob=enob))
+        results_dict = dict()
+        results_dict['sndr']=float(sndr)
+        results_dict['sfdr']=float(sfdr)
+        results_dict['enob']=float(enob)
+        print(results_dict)
+        write_yaml(self.specs['results_files']+'.yaml', results_dict)
+        return [fig_fft], MeasInfo('done', {})
 
     @classmethod
-    def process_fft(cls, tvec: np.ndarray, yvec: np.ndarray, plot: bool = True):
+    def process_fft(cls, tvec: np.ndarray, yvec: np.ndarray, file: str, plot: bool = True):
         time_vec = tvec
         sampled = yvec
         sampled_diff = sampled - np.mean(sampled)
@@ -538,24 +583,36 @@ class SarSliceDynamicMM(SarSliceMM):
         noise_pwr = np.sum(np.square(fft_sorted[:-1]))
         sig_pwr = fft_sorted[-1] ** 2
         sndr = 10 * np.log10(sig_pwr / noise_pwr)
+        enob = (sndr - 1.76) / 6.02
 
+        f, ax = plt.subplots(2)
         if plot:
-            f, ax = plt.subplots(2)
-            ax[0].set_title('Input Voltage vs Time')
-            ax[0].set_ylabel('Volatge (V)')
-            ax[1].set_xlabel('Time (s)')
+            ax[0].set_title('Output Voltage vs Time')
+            ax[0].set_ylabel('Voltage (V)')
+            ax[0].set_xlabel('Time (s)')
+            
+            ax[1].set_title('Output FFT')
+            ax[1].set_ylabel('dB')
             ax[1].set_xlabel('fs (GHz)')
 
             freq_axis = np.arange(n_points)[range(int(n_points // 2))] / n_points
 
+            _freq_axis = []
+            _fft_db = []
+            for freq, fft in zip(freq_axis, fft_db):
+                if fft>-150 and fft<float('inf'): # Even noise floor shouldn't be -150dB
+                    _fft_db.append(fft)
+                    _freq_axis.append(freq)
+
             ax[0].plot(time_vec, sampled)
-            ax[1].plot(freq_axis, fft_db, '--o', markerfacecolor="None",
-                       # color='red', markeredgecolor='red',
-                       linewidth=0.5)
-            at = AnchoredText(f"sfdr={sfdr}, sndr={sndr}", loc='upper left', frameon=True,)
+            ax[1].stem(_freq_axis, _fft_db, bottom=min(_fft_db)-2, use_line_collection=True )
+
+            at = AnchoredText('\n'.join([f"sfdr={sfdr:.2f}", 
+                                        f"sndr={sndr:.2f}", 
+                                        f"enob={enob:.2f}"]), loc='upper right', frameon=True)
             at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
             ax[1].add_artist(at)
             [x.grid(True) for x in ax]
             plt.tight_layout()
 
-        return sndr, sfdr
+        return f, sndr, sfdr, enob

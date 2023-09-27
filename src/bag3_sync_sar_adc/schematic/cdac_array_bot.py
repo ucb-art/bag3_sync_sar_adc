@@ -77,6 +77,7 @@ class bag3_sync_sar_adc__cdac_array_bot(Module):
     def design(self, cm: int, cm_sw: Param, cm_unit_params: Param, sw_params_list: List[Param],
                unit_params_list: List[Param], sw_m_list: List[int], cap_m_list: List[int],
                bot_probe: bool, remove_cap: bool, has_cm_sw:bool) -> None:
+        print("CM: ", cm)
         remove_cap = self.params['remove_cap']
         nbits = len(unit_params_list)
         # check length of switch params and cap params list:
@@ -143,12 +144,16 @@ class bag3_sync_sar_adc__cdac_array_bot(Module):
             self.instances[name].design(**sw_params_list[idx])
 
         # Design cm cap
-        cm_name = f"<XCAP_CM{cm - 1}:0>" if cm > 1 else f"XCAP_CM"
+        cm_name = f"XCAP_CM<{cm - 1}:0>" if cm > 1 else f"XCAP_CM"
         cm_cap_params = deepcopy(cm_unit_params.to_dict())
         cm_cap_params['intent'] = cm_unit_params['mim_type']
         self.instances['XCAP_CM'].design(**cm_cap_params)
 
-        cm_dum_name = f"<XCAP_CM_DUM{cm - 1}:0>" if cm > 1 else f"XCAP_CM_DUM"
+        cm_dum_name = f"XCAP_CM_DUM<{cm - 1}:0>" if cm > 1 else f"XCAP_CM_DUM"
+
+        if cm > 1:
+            self.rename_instance('XCAP_CM', cm_name)
+            self.rename_instance('XCAP_CM_DUM', cm_dum_name)
         cm_dum_cap_params = deepcopy(cm_unit_params.to_dict())
         cm_dum_cap_params['intent'] = cm_unit_params['mim_type']
         if cm_dum_cap_params['dum_col_l'] > 0:
@@ -161,7 +166,7 @@ class bag3_sync_sar_adc__cdac_array_bot(Module):
             self.remove_instance(cm_dum_name)
 
         if cm > 1:
-            self.rename_instance('XCAP_CM', f'XCM{cm-1:0}')
+            self.rename_instance('XCAP_CM', f'XCAP_CM{cm-1:0}')
             self.reconnect_instance_terminal(cm_name, 'BOT', 'vref<1>')
             self.reconnect_instance_terminal(cm_name, 'top', 'top')
             if remove_cap:

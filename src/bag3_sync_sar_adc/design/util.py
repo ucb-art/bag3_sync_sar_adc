@@ -116,7 +116,3 @@ def rec_str(obj):
         #     return data
         else:
             return obj
-        
-# def opt_specs_to_yaml():
-#     """ Write optimal design specs to a yaml file that can be used later"""
-#     pass

@@ -201,13 +201,14 @@ class SARSliceBootstrap(TemplateBase):
             # calculate space for cap bot routing and voltage reference routing
             sam_y = (-(-h_tot // h_blk)) * h_blk
             sam_bot_xm_tidx = self.grid.coord_to_track(xm_layer, sam_y, mode=RoundMode.NEAREST)
-            num_ref_ntr, sam_ref_locs = tr_manager.place_wires(xm_layer, ['cap']*(3), align_idx=0,
+            num_ref_ntr, sam_ref_locs = tr_manager.place_wires(xm_layer, ['cap']*(4), align_idx=0,
                                                        align_track=sam_bot_xm_tidx)
             num_sam_ntr, sam_bot_locs = tr_manager.place_wires(xm_layer, ['cap']*(nbits), align_idx=0,
                                                        align_track=sam_ref_locs[-1])
             coord_sam_tr = self.grid.track_to_coord(xm_layer, num_sam_ntr+num_ref_ntr)
 
-            sam_bot_locs.pop(0)
+            #sam_ref_locs.pop(0)
+            #sam_bot_locs.pop(0)
             sam_y = -(-(h_tot + coord_sam_tr)// h_blk) * h_blk
             sampler = self.add_instance(sampler_master, inst_name='XSAM',
                               xform=Transform(-(-(w_centered-w_sam)//(2*w_conn_blk))*w_conn_blk + (-(-w_clkgen_ext//w_conn_blk)*w_conn_blk ), sam_y)) #mode=Orientation.MY))

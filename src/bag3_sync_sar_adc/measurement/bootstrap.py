@@ -94,7 +94,7 @@ class BootstrapMM(MeasurementManager):
                 sample_time = [time[-1]-idx*per for idx in range(num_samples)]
                 sample_out = interp_out(sample_time)
                 fft = np.abs(np.fft.fft(sample_out)) / num_samples
-                fft = fft[1:num_samples // 2 + 1]
+                fft = 2*fft[1:num_samples // 2 + 1]
                 fft_db = 20 * np.log10(fft)
                 fft_db_sorted = np.sort(fft_db)
                 fft_sorted = np.sort(fft)
