@@ -90,7 +90,7 @@ class SarSliceMM(MeasurementManager):
         col_list = self._dut_specs_cdac['col_list']
         diff_idx = self._dut_specs_cdac['diff_idx']
         weight_list = [r*c for r,c in zip(row_list[1:diff_idx], col_list[1:diff_idx])] 
-        if diff_idx < nbit:
+        if diff_idx <= nbit:
             weight_list = weight_list + [2*r*c for r,c in zip(row_list[diff_idx:], col_list[diff_idx:])]
         self.weight_list = weight_list
 
@@ -507,7 +507,6 @@ class SarSliceDynamicMM(SarSliceMM):
         freq_sig = (num_sig/num_sample)*(1/t_per)
     """
     #FIXME Need to add DR measurement and max sampling speed characterization
-
     def process_output(self, sim_results: Union[SimResults, MeasureResult]
                        ) -> Tuple[bool, MeasInfo]:
         data = cast(SimResults, sim_results).data
@@ -515,6 +514,7 @@ class SarSliceDynamicMM(SarSliceMM):
         nbit = self._dut_specs_cdac['nbits']
         sim_params = self.specs['tbm_specs']['sim_params']
         num_sample = sim_params['num_sample']
+        num_sig = sim_params['num_sig']
         t_per = sim_params['t_per']
         row_list = self._dut_specs_cdac['row_list']
 
@@ -564,8 +564,14 @@ class SarSliceDynamicMM(SarSliceMM):
         results_dict['sfdr']=float(sfdr)
         results_dict['enob']=float(enob)
         print(results_dict)
+
+        figures_list = [fig_fft]
+        if self.specs['sine_hist']:
+            fig_lin, lin_dict = self.process_hist(dout_list)
+            results_dict = dict(results_dict, **lin_dict)
+            figures_list = figures_list + fig_lin
         write_yaml(self.specs['results_files']+'.yaml', results_dict)
-        return [fig_fft], MeasInfo('done', {})
+        return figures_list, MeasInfo('done', {})
 
     @classmethod
     def process_fft(cls, tvec: np.ndarray, yvec: np.ndarray, file: str, plot: bool = True):
@@ -616,3 +622,111 @@ class SarSliceDynamicMM(SarSliceMM):
             plt.tight_layout()
 
         return f, sndr, sfdr, enob
+
+    def process_hist(self, code_list: List[Union[float, int]]):
+        # Given code list, produce histogram, INL and DNL
+
+        # nbit = self._dut_specs_cdac['nbits']
+        # row_list = self._dut_specs_cdac['row_list']
+        # if len(row_list) < nbit:
+        #     num_bins = 2**nbit
+        # else:
+        # col_list = self._dut_specs_cdac['col_list']
+        # diff_idx = self._dut_specs_cdac['diff_idx']
+        # weight_list = [r*c for r,c in zip(row_list[1:diff_idx], col_list[1:diff_idx])] 
+        # if diff_idx < nbit:
+        #     weight_list = weight_list + [2*r*c for r,c in zip(row_list[diff_idx:], col_list[diff_idx:])]
+        num_bins = sum(self.weight_list)+1 
+        print(num_bins)
+        # x = np.linspace(0, 2*np.pi, 25600)
+        # code_list = np.sin(x) 
+
+        hist, bin_edges = np.histogram(code_list, bins=num_bins)
+        #correct for sine wave
+        # amp = 4*self.specs['tbm_specs']['sim_params']['vdm']
+        # lsb = amp/num_bins
+        # hist = [h*(1/np.pi())*(np.arcsin((n+1)*lsb/amp) - np.arcsin((n)*lsb/amp)) for n, h in enumerate(hist[:-1])] 
+        # fig_hist, ax_hist = plt.subplots(1,1)
+        # ax_hist.plot(np.arange(0, len(hist), 1), hist)
+        # ax_hist.set_title("Raw Histogram")
+
+        bins = hist[1:-1] # ignore first and last histogram points
+        avg_bins = sum(bins)/len(bins)
+        dnl_list = [(b/avg_bins)-1 for b in bins]
+        print(hist)
+        print("bins: ", bins)
+        # dnl = [(t - avg_codew)/avg_codew for t in time_delta]
+        inl_list = [sum(dnl_list[0:i]) for i, _ in enumerate(dnl_list)]
+        inl_list.append(sum(dnl_list))
+        
+        fig, ax = plt.subplots(2, 1)
+        labelsize=20
+        ticksize=18
+        ax[0].plot(np.arange(1, len(inl_list)+1, 1), inl_list, 'o--', label='INL', )
+        # plt.legend(loc='upper right')
+        # plt.title("INL - 8 bit")
+        ax[0].set_xlabel('Code', fontsize = labelsize, fontweight='bold')
+        ax[0].grid()
+        ax[0].set_ylabel('INL (LSB)', fontsize = labelsize, fontweight='bold')
+        ax[0].set_ylim([-(max(inl_list)+0.05), (max(inl_list)+0.05)])
+        plt.setp(ax[0].get_xticklabels(), fontsize=ticksize)
+        plt.setp(ax[0].get_yticklabels(), fontsize=ticksize)
+        # plt.figure(2)
+        ax[1].plot(np.arange(1, len(dnl_list)+1, 1), dnl_list, '^--', label='DNL', )
+        # plt.legend(loc='upper right')
+        # plt.title("DNL - 8 bit")
+        ax[1].set_xlabel('Code', fontsize = labelsize, fontweight='bold')
+        ax[1].grid()
+        ax[1].set_ylabel('DNL (LSB)', fontsize = labelsize, fontweight='bold')
+        ax[1].set_ylim([-(max(dnl_list)+0.05), (max(dnl_list)+0.05)])
+        plt.setp(ax[1].get_xticklabels(), fontsize=ticksize)
+        plt.setp(ax[1].get_yticklabels(), fontsize=ticksize)
+        plt.tight_layout()
+
+        ############### Correction of sine wave
+        factor = num_bins/2
+        print(len(code_list))
+        print(factor)
+        hist_sine = [len(code_list)/np.pi*(np.arcsin((n+1-factor)*1.6/((num_bins-1)*.825)) - np.arcsin((n-factor)*1.6/((num_bins-1)*.825))) for n in range(0, num_bins)] 
+        print(hist_sine, len(hist_sine), len(bins))
+        fig_hist_corr, ax_hist_corr = plt.subplots(1,1)
+        ax_hist_corr.plot(np.arange(0, len(hist_sine), 1), hist_sine)
+        ax_hist_corr.plot(np.arange(0, len(hist), 1), hist)
+        ax_hist_corr.set_title("Expected Sine Histogram")
+
+        #bins = hist[1:-1] # ignore first and last histogram points
+        #avg_bins = sum(bins)/len(bins)
+        # print("hist_sine: ", bins, hist_sine[1:-1])
+        # print(len(bins), len(hist_sine[1:-1]))
+        print([h*(sum(bins)/sum(hist_sine[1:-1])) for h in hist_sine[1:-1]])
+        dnl_list = [b/(h*sum(bins)/sum(hist_sine[1:-1]))-1 for b,h in zip(bins, hist_sine[1:-1])] #[(b/avg_bins)-1 for b in bins]
+        # print("DNL_LIST: ", dnl_list)
+        # dnl = [(t - avg_codew)/avg_codew for t in time_delta]
+        inl_list = [sum(dnl_list[0:i]) for i, _ in enumerate(dnl_list)]
+        inl_list.append(sum(dnl_list))
+        
+        fig_corr, ax_corr = plt.subplots(2, 1)
+        labelsize=20
+        ticksize=18
+        ax_corr[0].plot(np.arange(1, len(inl_list)+1, 1), inl_list, 'o--', label='INL', )
+        # plt.legend(loc='upper right')
+        # plt.title("INL - 8 bit")
+        ax_corr[0].set_xlabel('Code', fontsize = labelsize, fontweight='bold')
+        ax_corr[0].grid()
+        ax_corr[0].set_ylabel('INL (LSB)', fontsize = labelsize, fontweight='bold')
+        ax_corr[0].set_ylim([(min(inl_list)-0.05), (max(inl_list)+0.05)])
+        plt.setp(ax_corr[0].get_xticklabels(), fontsize=ticksize)
+        plt.setp(ax_corr[0].get_yticklabels(), fontsize=ticksize)
+        # plt.figure(2)
+        ax_corr[1].plot(np.arange(1, len(dnl_list)+1, 1), dnl_list, '^--', label='DNL', )
+        # plt.legend(loc='upper right')
+        # plt.title("DNL - 8 bit")
+        ax_corr[1].set_xlabel('Code', fontsize = labelsize, fontweight='bold')
+        ax_corr[1].grid()
+        ax_corr[1].set_ylabel('DNL (LSB)', fontsize = labelsize, fontweight='bold')
+        ax_corr[1].set_ylim([(min(dnl_list)-0.05), (max(dnl_list)+0.05)])
+        plt.setp(ax_corr[1].get_xticklabels(), fontsize=ticksize)
+        plt.setp(ax_corr[1].get_yticklabels(), fontsize=ticksize)
+        plt.tight_layout()
+
+        return [fig_hist_corr, fig, fig_corr], dict(inl=max(inl_list), dnl=max(dnl_list))

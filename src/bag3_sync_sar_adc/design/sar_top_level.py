@@ -382,7 +382,7 @@ def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config
         ratio_list.append(_ratio)
     print(ny_list) 
     sq_area = unit_cap/capparea  
-    wl = math.sqrt(sq_area)
+    wl = math.sqrt(sq_area) if sum(redun_config)<128 else 1000
     unit_width = math.ceil(wl/lay_res) if math.ceil(wl/lay_res)>min_cap else min_cap
     unit_height = unit_width
     width = unit_width * cap_cols
@@ -566,7 +566,7 @@ if __name__ == '__main__':
         print(f"----Comparator noise {comp_opt_perf['noise'][0]} less than budgeted {noise_comp} ----- :)")
         
     kT = 9.83e-22
-    unit_cap = (kT/noise_cdac)/sum(redun_config)
+    unit_cap = (kT/noise_cdac)/sum(redun_config) 
     set_cdac_params(gen_specs_cdac, dest_file_list['cdac'], redun_config, 
                     unit_cap)
     set_logic_params(gen_specs_logic_array, dest_file_list['logic'], len(redun_config))
