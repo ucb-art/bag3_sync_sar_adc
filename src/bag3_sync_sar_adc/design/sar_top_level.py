@@ -154,140 +154,6 @@ def budget_noise(tot_noise: float, clk_jitter:float, samp_freq: Union[float, int
 
     return cdac_budget, comp_budget, jitter_budget
 
-def non_binary_redundancy(resolution, R, mismatch, cap_cols: int=4, rowsplit: int = 5):
-
-    p_list = [1]
-    diff_flag = 0
-    pbyq_max = R  #0.5*math.exp(0.7*resolution/R)
-    finish_flag = 0
-    while(not finish_flag):
-        remwt = pow(2, resolution) - 1 - sum(p_list)
-        
-        p_temp = 2*p_list[-1]
-        q_temp = -p_temp + sum(p_list) + 1
-        if q_temp==0:
-            w_pq = 1 if p_temp > 4 else 0
-
-        elif (p_temp/q_temp>pbyq_max):
-            w_pq = (p_temp-pbyq_max*q_temp)/(pbyq_max+1)
-        else:
-            w_pq = 0
-        w_mismatch = 0 #1 if p_temp>2 else 0 #mismatch*0.01*p_temp/pow(2, resolution)
-        w_adj = math.ceil(max(w_pq, w_mismatch))
-        
-        valid_list = [i for i in range(1, cap_cols+1)] + [(cap_cols-1)*i for i in range(2, rowsplit+2)] \
-                         +  [cap_cols*i for i in range(2, rowsplit+1)]
-        valid_list = list(set(sorted(valid_list)))
-        p_temp = min(valid_list, key=lambda x: abs(x - (p_temp-w_adj))) \
-                    if math.ceil((p_temp-w_adj)/cap_cols) <= rowsplit else p_temp-w_adj
-        
-        # Reweight first few indices to make the weight determination in later steps easier
-        if math.ceil(p_temp/4) > rowsplit : 
-            if not diff_flag:
-                sum_lower = sum(p_list)
-                offset = (pow(2, resolution) - 1 - sum_lower)%(cap_cols*2)
-                print("OFFSET: ", offset)
-                offset = offset-(cap_cols*2) if offset>cap_cols else offset
-                print("OFFSET ADJ: ", offset)
-                remwt_short = sum_lower + offset  #_short indicates that it pertains to the list of indices that dont get split
-                if offset> 0:
-                    pbyq_max_short = R*2 #0.5*math.exp(0.7*resolution/R)
-                    print("pbyq: ", pbyq_max_short)
-                    finish_flag_short = 0
-                    ps_list=[1]
-                elif offset<0:
-                    pbyq_max_short = pbyq_max #0.5*math.exp(0.7*resolution/R)
-                    print("pbyq: ", pbyq_max_short)
-                    finish_flag_short = 0
-                    ps_list=[1]
-                else:
-                    finish_flag_short = 1
-                while(not finish_flag_short):
-                    # p is next value, q is sum of existing values (?)
-                    # want to have a p/q that hits the redundancy requirements
-                    # basically reconstruct the first few weights in list to satisfy remwt_short
-                    remwts = remwt_short - sum(ps_list)
-                    ps_temp = 2*ps_list[-1]
-                    qs_temp = -ps_temp + sum(ps_list) + 1
-                    print("qs_temp: ", qs_temp)
-                    if qs_temp==0: # in case q is 0, dont get undefined
-                        ws_pq = 1 if ps_temp > cap_cols else 0 
-
-                    elif (ps_temp/qs_temp>pbyq_max_short):
-                        # adjust p by ws_pq
-                        ws_pq = (ps_temp-pbyq_max_short*qs_temp)/(pbyq_max_short+1) if ps_temp > cap_cols else 0
-                    else:
-                        ws_pq = 0
-                    ws_mismatch = mismatch/100 if (ps_temp>cap_cols) else 0 
-                    ws_adj = math.ceil(max(ws_pq, ws_mismatch)) # final adjustment is max of ws_pq or ws_mismatch
-                    ps_temp = min(valid_list, key=lambda x: abs(x - (ps_temp-ws_adj)))
-                    
-                    # Sort out case where the remaining weight isn't a nice "valid number"
-                    if remwts<ps_temp:
-                        if remwts in valid_list:
-                            ps_list.append(remwts)
-                        else: 
-                            sorted_list = sorted(valid_list, key=lambda x: abs(x - remwts))
-                            # get closest number that is larger than remwts
-                            for s in sorted_list:
-                                if s > remwts:
-                                    closest_number = s
-                                    break
-                            # closest_number = sorted_list[0] if sorted_list[0]>remwts \
-                            #                     else sorted_list[1]
-
-                            qs_list = [0] + [-p + sum(ps_list[0:j]) + 1 for j, p in enumerate(ps_list)]
-                            sub_off = closest_number - remwts
-                            print(closest_number, sub_off)
-                            print(ps_list[::-1])
-                            for i, rev_p in enumerate(ps_list[::-1]):
-                                if sub_off > 0 and rev_p <=cap_cols:
-                                    print(ps_list[len(ps_list)-1-i])
-                                    ps_list[len(ps_list)-1-i] = ps_list[len(ps_list)-1-i]-1
-                                    sub_off = sub_off - 1
-                            ps_list.append(closest_number)
-                        finish_flag_short = 1
-                    else:
-                        ps_list.append(ps_temp)
-                        finish_flag_short = 0
-                
-                if offset != 0:
-                    p_list = sorted(ps_list) 
-                diff_flag = 1
-
-                p_temp = 2*p_list[-1]
-                q_temp = -p_temp + sum(p_list) + 1
-                if q_temp==0:
-                    p_temp = p_temp - 1
-                elif (p_temp/q_temp>pbyq_max):
-                    w_pq = (p_temp-pbyq_max*q_temp)/(pbyq_max+1)
-                else:
-                    w_pq = 0
-
-                w_mismatch = mismatch/100 if (p_temp>cap_cols and q_temp <1) else 0 #mismatch*0.01*p_temp/pow(2, resolution)
-                w_adj = math.ceil(max(w_pq, w_mismatch))
-
-                p_temp = p_temp-w_adj
-                p_temp = p_temp - p_temp%(cap_cols*2) if p_temp%(cap_cols*2) < cap_cols or \
-                         (-(p_temp + cap_cols*2 - p_temp%(cap_cols*2)) + sum(p_list) + 1) <1 \
-                        else p_temp + (cap_cols*2) - p_temp%(cap_cols*2)
-
-            else:
-                p_temp = p_temp - p_temp%(cap_cols*2) if p_temp%(cap_cols*2) < cap_cols or \
-                         (-(p_temp + cap_cols*2 - p_temp%(cap_cols*2)) + sum(p_list) + 1) <1 \
-                        else p_temp + (cap_cols*2) - p_temp%(cap_cols*2)
-            
-        if remwt<p_temp:
-            p_list.append(remwt)
-            finish_flag = 1
-        else:
-            p_list.append(p_temp)
-            finish_flag = 0
-  
-    final_plist = sorted(p_list)
-    qs_list = [0] + [-p + sum(final_plist[0:j]) + 1 for j, p in enumerate(final_plist)]
-    return sorted(p_list)
-
 def set_redundancy(resolution: int, throughput: int, mismatch: float):
     """Set the redundancy scheme
 
@@ -299,26 +165,130 @@ def set_redundancy(resolution: int, throughput: int, mismatch: float):
     # num_codes = pow(2, resolution) * (1+mismatch*0.001)
     # bits_redun = num_codes - pow(2, resolution)
     if pow(2, resolution)>pow(2, throughput): 
-        # I think this should be an error
+        # Maybe make error
         print("Warning: Resolution not possible given throughput")
         return [pow(2, n) for n in range(resolution)]
     elif resolution==throughput:
         return [pow(2, n) for n in range(resolution)]
     else:
-        R = 0.5*math.exp(0.7*resolution/3)
-        if R>1 and throughput>resolution:
-            max_cycles = 0
-            p_list_prev = []
-            while R>=1 and R<200 and max_cycles==0:
-                p_list = non_binary_redundancy(resolution, R, mismatch)
-                max_cycles = 1 if len(p_list)<=throughput else 0 
-                R = R*2
-        else:
-            print("Warning: no settling improvement achieved through \
-                  non-binary weighting, binary output returned")
-            p_list = [pow(2, n) for n in range(resolution)]
+        p_list = opt_redundancy(resolution, throughput)
         return p_list
-        
+    
+def opt_redundancy(resolution, throughput, rowsplit: int = 5):
+    from gekko import GEKKO
+
+    #Initialize Model
+    m = GEKKO(remote=False)
+
+    m.options.SOLVER=1  # APOPT is an MINLP solver
+
+    # optional solver settings with APOPT
+    m.solver_options = ['minlp_maximum_iterations 500', \
+                        # minlp iterations with integer solution
+                        'minlp_max_iter_with_int_sol 100', \
+                        # treat minlp as nlp
+                        'minlp_as_nlp 0', \
+                        # nlp sub-problem max iterations
+                        'nlp_maximum_iterations 500', \
+                        # 1 = depth first, 2 = breadth first
+                        'minlp_branch_method 1', \
+                        # maximum deviation from whole number
+                        'minlp_integer_tol 0.05', \
+                        # covergence tolerance
+                        'minlp_gap_tol 0.01']
+
+    # Initialize variables
+    x = m.Array(m.Var,throughput,value=1,lb=1,ub=pow(2, resolution-1), integer=True)
+    
+    m.Equation(np.sum(x)==(pow(2,resolution)-1))
+    m.Equation(x[0]==1)
+    R = 1.9 #0.5*math.exp(0.7*resolution/3)
+    for i in range(throughput-1):
+        x[i+1].value = min(x[i].value*2, pow(2, resolution-1), int(pow(R, i)))
+        m.Equation(2*x[i]>=x[i+1])
+
+    objective_k = []
+    for i in range(2, throughput):
+        qk = -x[i] + 1 + np.sum(x[0:i])
+        value = np.sum([pow(num, 2) for num in x[0:i+1]])
+        obj = m.Intermediate(qk/(m.sqrt(value +1)))
+        objective_k.append(obj)
+
+    mn = objective_k[0] # min
+    for i in range(1,len(objective_k)):
+        mn = m.min3(mn,objective_k[i])
+
+    m.Maximize(mn)
+    try:
+        m.solve(disp=False)    # solve
+    except:
+        print('Not successful')
+        from gekko.apm import get_file
+        print(m._server)
+        print(m._model_name)
+        f = get_file(m._server,m._model_name,'infeasibilities.txt')
+        f = f.decode().replace('\r','')
+        with open('infeasibilities.txt', 'w') as fl:
+            fl.write(str(f))
+
+    x = [xi.value[0] for xi in x]
+    val_ints = [1,2] + [3*i for i in range(1,rowsplit+1)] +\
+               [4*i for i in range(1,rowsplit+1)] + [8*i for i in range(rowsplit//2, pow(2, resolution)//(2*8))]
+    sorted_list = sorted(val_ints)
+    
+    # Remove duplicates
+    unique_list = []
+    for item in sorted_list:
+        if item not in unique_list:
+            unique_list.append(item)
+    val_ints = unique_list
+
+    rounded_list = round_list(x, val_ints, max_difference=10)
+    return rounded_list
+
+def round_list(original_list, target_list, max_difference):
+    rounded_list = []
+
+    # Calculate the sum of the original list and the target list
+    original_sum = sum(original_list)
+    target_sum = sum(target_list)
+
+    # Round each number in the original list
+    for num in original_list:
+        rounded_num = min(target_list, key=lambda x: abs(x - num))
+        rounded_list.append(rounded_num)
+
+    # Calculate the sum of the rounded list
+    rounded_sum = sum(rounded_list)
+
+    # Adjust the rounded list if the difference is beyond the maximum allowed
+    max_itr = 50
+    itr = 0
+    while itr < max_itr: 
+        smallest_to_add = 3 if itr<max_itr/2 else (2 if itr<(max_itr/2 + max_itr//4) else 1)
+        if rounded_sum<original_sum: 
+            diff_to_add = original_sum-rounded_sum
+            sum_forward = 0
+            for i, r in enumerate(rounded_list[:-1]): 
+                targ_idx = target_list.index(r)
+                if i>0 and r>smallest_to_add: 
+                    if targ_idx < len(target_list)-1: 
+                        if target_list[targ_idx+1]//2 <=rounded_list[i-1]:
+                            rounded_list[i] = target_list[targ_idx+1]
+                            sum_forward += target_list[targ_idx+1]-target_list[targ_idx]
+                    if sum_forward >= diff_to_add:
+                        break
+            rounded_sum = sum(rounded_list)
+            
+        itr +=1
+        if rounded_sum>= original_sum and rounded_sum<original_sum + max_difference:
+            break
+
+    if rounded_sum<original_sum: 
+        print("WARNING: weights do not sum to desired resolution! Manual intervention needed")
+    print('FINAL CAP SIZES', rounded_list, rounded_sum)
+    return rounded_list
+
 def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config: List[int], 
                     unit_cap: float, capparea: float=2.2e-6, cap_cols:int=4, rowsplit: int = 5, 
                     lay_res:float=0.005, min_cap: float=400):
@@ -347,7 +317,6 @@ def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config
     ratio_list = [1]
 
     valid_ny_sizes = [pow(2, i) for i in range(int(math.log(sum(redun_config))))] #[1,2,4] + [cap_cols*2*i for i in range(1, redun_config[-1]//(cap_cols*2))]
-    print("VALID NY SIZES: ", valid_ny_sizes)
     diff_flag = 0
     diff_idx = nbits+1
     for idx, size in enumerate(redun_config):
@@ -364,7 +333,7 @@ def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config
                 _ratio = cap_cols
                 if size/cap_cols > rowsplit:
                     diff_idx = idx+1 if not(diff_flag) else diff_idx
-                    diff_flag = 1 if not(diff_flag) else 0
+                    diff_flag = 1 if not(diff_flag) else diff_flag
                     _row = size//(2*cap_cols) 
                     #_ny = int(round(_row/(2*cap_cols))*2*cap_cols)
                     _ratio = cap_cols*2
@@ -382,7 +351,8 @@ def set_cdac_params(cdac_params: Mapping[str, Any], dest_file: str, redun_config
         ratio_list.append(_ratio)
     print(ny_list) 
     sq_area = unit_cap/capparea  
-    wl = math.sqrt(sq_area) if sum(redun_config)<128 else 1000
+    print("CAP WIDTH: ", math.sqrt(sq_area))
+    wl = math.sqrt(sq_area) if sum(redun_config)<128 else 2
     unit_width = math.ceil(wl/lay_res) if math.ceil(wl/lay_res)>min_cap else min_cap
     unit_height = unit_width
     width = unit_width * cap_cols
@@ -552,7 +522,6 @@ if __name__ == '__main__':
     lsb_size = input_range/pow(2, N)
     max_noise = lsb_size/2
     redun_config = set_redundancy(N, throughput, c_mismatch)
-    print(redun_config)
 
     noise_cdac, noise_comp, noise_jitter = budget_noise(max_noise, clk_jitter, 
                                                         samp_freq, input_range, unit_res)
@@ -590,12 +559,12 @@ if __name__ == '__main__':
 
     # # simulate ADC
     # run_meas_cell(_prj, specs['top_verification_tbm']['static'], _args)
-    run_meas_cell(_prj, specs['top_verification_tbm']['dynamic'], _args, 
-                  dest_file_list['sar_top'], len(redun_config))
+    # run_meas_cell(_prj, specs['top_verification_tbm']['dynamic'], _args, 
+    #               dest_file_list['sar_top'], len(redun_config))
 
-    # read results
-    performance = read_yaml('results_dynamic.yaml')
-    print(performance)
+    # # read results
+    # performance = read_yaml('results_dynamic.yaml')
+    # print(performance)
 
     # #enumerate how the ADC failed:
     # while (pass_specs !=0 and iterations<num_iter):
