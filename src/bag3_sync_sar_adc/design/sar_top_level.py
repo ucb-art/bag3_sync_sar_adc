@@ -424,7 +424,6 @@ def set_comp_opt_params(opt_file_src: str, opt_file_dest: str, td: float, noise:
     write_dsn_params['dsn_params']['opt_specs']['spec_constraints']['delay'][1] = td
     write_dsn_params['dsn_params']['opt_specs']['spec_constraints']['noise'][1] = noise
     write_yaml(opt_file_dest, write_dsn_params)
-    print("HABU      ", opt_file_dest)
     return opt_file_dest
 
     
