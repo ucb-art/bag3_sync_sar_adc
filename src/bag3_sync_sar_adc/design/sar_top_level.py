@@ -418,8 +418,19 @@ def set_clk_params(clk_params: Mapping[str, Any], dest_file: str, nbits: int):
     write_params['params']['total_cycles']=nbits
     write_yaml(dest_file, write_params)
 
+def set_comp_opt_params(opt_file_src: str, opt_file_dest: str, td: float, noise: float):
+
+    write_dsn_params = copy.deepcopy(read_yaml(opt_file_src))
+    write_dsn_params['dsn_params']['opt_specs']['spec_constraints']['delay'][1] = td
+    write_dsn_params['dsn_params']['opt_specs']['spec_constraints']['noise'][1] = noise
+    write_yaml(opt_file_dest, write_dsn_params)
+    print("HABU      ", opt_file_dest)
+    return opt_file_dest
+
+    
 def set_sample_opt_params(opt_file_src: str, opt_file_dest: str, sig_sampler_wrfile: str,
-                          gen_specs_sampler: Mapping[str, Any], meas_wrfile: str, len_redun: int):
+                          gen_specs_sampler: Mapping[str, Any], meas_wrfile: str, 
+                          len_redun: int, fs: int):
     
     sig_sampler_params = copy.deepcopy(read_yaml(gen_specs_sampler['params']['sig_sampler']))
     default_list = sig_sampler_params['params']['nmos_params']['sampler_params']['m_list']
@@ -444,6 +455,7 @@ def set_sample_opt_params(opt_file_src: str, opt_file_dest: str, sig_sampler_wrf
 
         write_dsn_params['dsn_params']['gen_specs'] = sig_sampler_wrfile
         write_dsn_params['dsn_params']['meas_params'] = meas_wrfile
+        write_dsn_params['dsn_params']['opt_specs']['spec_constraints']['fs'][0] = fs
         write_yaml(opt_file_dest, write_dsn_params)
 
         return opt_file_dest
@@ -452,7 +464,7 @@ def set_sample_opt_params(opt_file_src: str, opt_file_dest: str, sig_sampler_wrf
 
 def set_sampletop_params(sampler_params: Mapping[str, Any], dest_files):
     """
-        Calculates the clk divider parameters and writes to file
+        Calculates the sampler parameters and writes to file
         Arguments:
             logic_params: Mapping of parameters
             dest_file: str of destination yaml path to write to
@@ -527,8 +539,14 @@ if __name__ == '__main__':
                                                         samp_freq, input_range, unit_res)
 
     # TODO: parallelize the optimizer run
-    run_dsn(_prj, specs['opt_components']['comp'], _args, dest_file_list['comp'])
+    delay_constraint = 1/(specs['top_specs']['samp_freq']*specs['top_specs']['throughput']*2)
+    comp_opt_file = set_comp_opt_params(specs['opt_components']['comp'],
+                                dest_file_list['directory']+specs['opt_components']['comp'].split("/")[-1],
+                                td = delay_constraint,
+                                noise = noise_comp)
+    run_dsn(_prj, comp_opt_file, _args, dest_file_list['comp'])
     comp_opt_perf = read_yaml(dest_file_list['comp'].replace('.yaml', '_result.yaml'))
+
     if comp_opt_perf['noise'][0] > noise_comp:
         print("*****WARNING: Comparator noise budgeted unacheivable for topology and sizing range")
     else:
@@ -543,12 +561,14 @@ if __name__ == '__main__':
                   len(redun_config)+(1 if len(redun_config)%2 else 2))
 
     # # sampler
+    # sampler currently treats 16MHz sample freq as 64
     sampler_opt_file = set_sample_opt_params(specs['opt_components']['bootstrap'],
                                 dest_file_list['directory']+specs['opt_components']['bootstrap_copy'], 
                                 dest_file_list['directory']+specs['opt_components']['sig_sampler_dsn'],
                                 gen_specs_sampler,
                                 dest_file_list['directory']+specs['opt_components']['sig_sampler_meas'],
-                                len(redun_config))
+                                len(redun_config),
+                                fs=round(((specs['top_specs']['samp_freq']*specs['top_specs']['throughput']/2)/16e6)*64) )
     print("SIMMING THIS: ", sampler_opt_file, '-----------------------------------------------------')
     run_dsn(_prj, sampler_opt_file, _args, 
             dest_file_list['sampler']['sig_sampler'])
@@ -559,12 +579,12 @@ if __name__ == '__main__':
 
     # # simulate ADC
     # run_meas_cell(_prj, specs['top_verification_tbm']['static'], _args)
-    # run_meas_cell(_prj, specs['top_verification_tbm']['dynamic'], _args, 
-    #               dest_file_list['sar_top'], len(redun_config))
+    run_meas_cell(_prj, specs['top_verification_tbm']['dynamic'], _args, 
+                  dest_file_list['sar_top'], len(redun_config))
 
     # # read results
-    # performance = read_yaml('results_dynamic.yaml')
-    # print(performance)
+    performance = read_yaml('results_dynamic.yaml')
+    print(performance)
 
     # #enumerate how the ADC failed:
     # while (pass_specs !=0 and iterations<num_iter):

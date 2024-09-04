@@ -253,9 +253,19 @@ class BootstrapMM(MeasurementManager):
         print(results)
         res = dict()
         if len(results['Fsamp']['enob'][f'bit<{numbits-1}>'].shape) > 1:
-            res['max_enob'] = np.array([max(r) for r in results['Fsamp']['enob'][f'bit<{numbits-1}>']])
+            pts_sim = len(results['Fsamp']['enob'][f'bit<{numbits-1}>'])
+            max_enob = results['Fsamp']['enob'][f'bit<{numbits-1}>'][pts_sim-1]
+            fs = results['Fsamp']['fs'][pts_sim-1]
+            for i in range(pts_sim):
+                if (results['Fsamp']['sfdr'][f'bit<{numbits-1}>'][0] - results['Fsamp']['sfdr'][f'bit<{numbits-1}>'][i]) > 3:
+                    max_enob = results['Fsamp']['enob'][f'bit<{numbits-1}>'][i]
+                    fs = results['Fsamp']['fs'][i]
+                    break
+            res['max_enob'] = max_enob 
+            res['fs'] = fs # np.array([max(r) for r in results['Fsamp']['enob'][f'bit<{numbits-1}>']])
         else :
             res['max_enob'] = max(results['Fsamp']['enob'][f'bit<{numbits-1}>'])
+            res['fs'] = max(results['Fsamp']['fs'])
         # res['switch_resistance']
         # res['dynamic_range'] = fit_dr()
 

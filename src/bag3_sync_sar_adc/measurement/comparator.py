@@ -20,6 +20,7 @@ from bag3_testbenches.measurement.data.tran import EdgeType
 from bag3_testbenches.measurement.tran.digital import DigitalTranTB
 from bag3_testbenches.measurement.pnoise.base import PNoiseTB
 from bag3_testbenches.measurement.pac.base import PACTB
+from bag3_testbenches.measurement.data.tran import interp1d_no_nan
 
 class ComparatorMM(MeasurementManager):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -110,11 +111,27 @@ class ComparatorMM(MeasurementManager):
                                  'Input Ref noise': in_referred_noise_list})
 
     @staticmethod
-    def process_output_delay(sim_results: Union[SimResults, MeasureResult], tbm: DigitalTranTB) -> MeasInfo:
+    def process_output_delay(sim_results: Union[SimResults, MeasureResult], tbm: DigitalTranTB, t_per:float) -> MeasInfo:
         data = cast(SimResults, sim_results).data
         t_d = tbm.calc_delay(data, 'clk', 'outn', EdgeType.RISE, EdgeType.CROSS, '2.25*t_per', 't_sim')
-        result = dict(td=t_d)
+        # result = dict()
 
+        avg_power_list = []
+        for run in range(len(data['VDC_VDD:p'])):
+            interp_current = interp1d_no_nan(data['time'], data['VDC_VDD:p'][run])
+            times = [t_per*2]
+            delta_t = []
+            values = [interp_current(t_per*2)]
+            for t, i in zip ( data['time'], data['VDC_VDD:p'][run]):
+                if t> times[-1]:
+                    delta_t.append(t-times[-1])
+                    times.append(t)
+                    values.append(abs(i))                    
+                    
+            avg_power = data['VDD'][0][0]*np.sum(np.array(delta_t)*np.array(values[:-1]))/(times[-1]-times[0])
+            avg_power_list.append(avg_power)
+        result = dict(td=t_d,
+                      avg_power=np.array(avg_power_list))
         return MeasInfo('done', result)
 
     @staticmethod
@@ -161,7 +178,7 @@ class ComparatorMM(MeasurementManager):
             tbm_delay = self.setup_tbm(sim_db, dut, DigitalTranTB)
             delay_results = await self._run_sim(name + '_delay', sim_db, sim_dir, dut, tbm_delay)
             data = cast(SimResults, delay_results).data
-            results['delay'] = self.process_output_delay(delay_results, tbm_delay).prev_results
+            results['delay'] = self.process_output_delay(delay_results, tbm_delay, self.specs['tbm_specs']['sim_params']['t_per']).prev_results
             # cls = ComparatorDelayMM
             # cls.plot_vcm(data, results['delay']['td'], matplotlib.pyplot, tbm_delay)
         #     plt.plot([1,2,3], [1,2,3])
